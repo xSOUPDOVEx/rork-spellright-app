@@ -4,38 +4,142 @@ export type Word = {
   difficulty: 'easy' | 'medium' | 'hard';
   category: string;
   hint?: string;
+  phonetics?: string;
 };
 
 export const mockWords: Word[] = [
-  { id: '1', word: 'necessary', difficulty: 'medium', category: 'Common', hint: 'One collar, two sleeves' },
-  { id: '2', word: 'accommodate', difficulty: 'hard', category: 'Common', hint: 'Two c\'s, two m\'s' },
-  { id: '3', word: 'separate', difficulty: 'medium', category: 'Common', hint: 'There\'s a rat in separate' },
-  { id: '4', word: 'definitely', difficulty: 'medium', category: 'Common', hint: 'Finite is in definitely' },
-  { id: '5', word: 'occurrence', difficulty: 'hard', category: 'Common', hint: 'Two c\'s, two r\'s' },
-  { id: '6', word: 'receive', difficulty: 'medium', category: 'Common', hint: 'I before E except after C' },
-  { id: '7', word: 'believe', difficulty: 'easy', category: 'Common', hint: 'Never believe a lie' },
-  { id: '8', word: 'achieve', difficulty: 'easy', category: 'Common', hint: 'I before E' },
-  { id: '9', word: 'conscience', difficulty: 'hard', category: 'Common', hint: 'Science with a con' },
-  { id: '10', word: 'embarrass', difficulty: 'medium', category: 'Common', hint: 'Two r\'s, two s\'s' },
-  { id: '11', word: 'rhythm', difficulty: 'hard', category: 'Tricky', hint: 'Rhythm Helps Your Two Hips Move' },
-  { id: '12', word: 'beautiful', difficulty: 'easy', category: 'Common', hint: 'Big Elephants Are Ugly' },
-  { id: '13', word: 'tomorrow', difficulty: 'easy', category: 'Common', hint: 'One M, two R\'s' },
-  { id: '14', word: 'beginning', difficulty: 'medium', category: 'Common', hint: 'Double N in the middle' },
-  { id: '15', word: 'restaurant', difficulty: 'medium', category: 'Common', hint: 'Rest at a restaurant' },
+  {
+    id: '1',
+    word: 'apple',
+    difficulty: 'easy',
+    category: 'Food',
+    hint: 'A red or green fruit',
+    phonetics: '/ˈæp.əl/',
+  },
+  {
+    id: '2',
+    word: 'banana',
+    difficulty: 'easy',
+    category: 'Food',
+    hint: 'A yellow curved fruit',
+    phonetics: '/bəˈnæn.ə/',
+  },
+  {
+    id: '3',
+    word: 'elephant',
+    difficulty: 'easy',
+    category: 'Animals',
+    hint: 'A large animal with a trunk',
+    phonetics: '/ˈel.ɪ.fənt/',
+  },
+  {
+    id: '4',
+    word: 'beautiful',
+    difficulty: 'medium',
+    category: 'Adjectives',
+    hint: 'Pleasing to the eye',
+    phonetics: '/ˈbjuː.tɪ.fəl/',
+  },
+  {
+    id: '5',
+    word: 'necessary',
+    difficulty: 'medium',
+    category: 'Adjectives',
+    hint: 'Required or essential',
+    phonetics: '/ˈnes.ə.ser.i/',
+  },
+  {
+    id: '6',
+    word: 'restaurant',
+    difficulty: 'medium',
+    category: 'Places',
+    hint: 'A place where you eat meals',
+    phonetics: '/ˈres.tər.ɑːnt/',
+  },
+  {
+    id: '7',
+    word: 'Wednesday',
+    difficulty: 'medium',
+    category: 'Days',
+    hint: 'The middle day of the week',
+    phonetics: '/ˈwenz.deɪ/',
+  },
+  {
+    id: '8',
+    word: 'accommodate',
+    difficulty: 'hard',
+    category: 'Verbs',
+    hint: 'To provide lodging or make room for',
+    phonetics: '/əˈkɒm.ə.deɪt/',
+  },
+  {
+    id: '9',
+    word: 'conscience',
+    difficulty: 'hard',
+    category: 'Abstract',
+    hint: 'Your inner sense of right and wrong',
+    phonetics: '/ˈkɒn.ʃəns/',
+  },
+  {
+    id: '10',
+    word: 'rhythm',
+    difficulty: 'hard',
+    category: 'Music',
+    hint: 'A pattern of beats in music',
+    phonetics: '/ˈrɪð.əm/',
+  },
+  {
+    id: '11',
+    word: 'definitely',
+    difficulty: 'hard',
+    category: 'Adverbs',
+    hint: 'Without doubt or certainly',
+    phonetics: '/ˈdef.ɪ.nət.li/',
+  },
+  {
+    id: '12',
+    word: 'separate',
+    difficulty: 'medium',
+    category: 'Verbs',
+    hint: 'To divide or keep apart',
+    phonetics: '/ˈsep.ər.eɪt/',
+  },
 ];
 
-export type ProgressData = {
-  date: string;
-  xp: number;
-  accuracy: number;
-};
-
-export const mockProgressData: ProgressData[] = [
-  { date: '2025-10-05', xp: 120, accuracy: 85 },
-  { date: '2025-10-06', xp: 150, accuracy: 88 },
-  { date: '2025-10-07', xp: 180, accuracy: 92 },
-  { date: '2025-10-08', xp: 200, accuracy: 90 },
-  { date: '2025-10-09', xp: 250, accuracy: 95 },
-  { date: '2025-10-10', xp: 280, accuracy: 93 },
-  { date: '2025-10-11', xp: 320, accuracy: 96 },
+export const mockProgressData = [
+  {
+    date: '2025-10-07',
+    xp: 50,
+    accuracy: 75,
+  },
+  {
+    date: '2025-10-08',
+    xp: 80,
+    accuracy: 78,
+  },
+  {
+    date: '2025-10-09',
+    xp: 120,
+    accuracy: 82,
+  },
+  {
+    date: '2025-10-10',
+    xp: 150,
+    accuracy: 85,
+  },
+  {
+    date: '2025-10-11',
+    xp: 180,
+    accuracy: 88,
+  },
+  {
+    date: '2025-10-12',
+    xp: 220,
+    accuracy: 90,
+  },
+  {
+    date: '2025-10-13',
+    xp: 250,
+    accuracy: 92,
+  },
 ];
