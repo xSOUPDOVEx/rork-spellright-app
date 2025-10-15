@@ -125,10 +125,12 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 24,
+    paddingTop: 32,
   },
   header: {
     alignItems: 'center',
     marginBottom: 32,
+    marginTop: 16,
   },
   scoreCircle: {
     width: 120,

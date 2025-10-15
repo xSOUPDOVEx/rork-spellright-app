@@ -71,34 +71,33 @@ export default function DrillScreen() {
     Animated.sequence([
       Animated.timing(keyAnimations[key], {
         toValue: 0.94,
-        duration: 50,
+        duration: 30,
         useNativeDriver: true,
       }),
-      Animated.spring(keyAnimations[key], {
+      Animated.timing(keyAnimations[key], {
         toValue: 1,
+        duration: 50,
         useNativeDriver: true,
-        speed: 100,
-        bounciness: 4,
       }),
     ]).start();
   };
 
   const handleKeyPress = (key: string) => {
     if (showFeedback) return;
+    setUserInput(prev => prev + key.toLowerCase());
+    animateKeyPress(key);
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    animateKeyPress(key);
-    setUserInput(prev => prev + key.toLowerCase());
   };
 
   const handleBackspace = () => {
     if (showFeedback) return;
+    setUserInput(prev => prev.slice(0, -1));
+    animateKeyPress('backspace');
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    animateKeyPress('backspace');
-    setUserInput(prev => prev.slice(0, -1));
   };
 
   const handleSubmit = () => {
@@ -416,7 +415,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 8,
+    minHeight: 200,
   },
   feedbackContainer: {
     alignItems: 'center',
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   keyboardContainer: {
-    paddingBottom: 12,
+    paddingBottom: 8,
     gap: 8,
   },
   keyboardRow: {
