@@ -1,56 +1,46 @@
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import Colors from '@/constants/colors';
-import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
 
-type ProgressBarProps = {
+interface ProgressBarProps {
   progress: number;
   total: number;
-  showLabel?: boolean;
   height?: number;
-  testID?: string;
-};
+  showLabel?: boolean;
+  color?: string;
+}
 
 export default function ProgressBar({
   progress,
   total,
-  showLabel = true,
   height = 12,
-  testID,
+  showLabel = true,
+  color = Colors.primary,
 }: ProgressBarProps) {
   const percentage = Math.min((progress / total) * 100, 100);
-  const animatedWidth = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.spring(animatedWidth, {
-      toValue: percentage,
-      useNativeDriver: false,
-      tension: 40,
-      friction: 8,
-    }).start();
-  }, [percentage, animatedWidth]);
 
   return (
-    <View style={styles.container} testID={testID}>
-      <View style={[styles.track, { height }]}>
-        <Animated.View
+    <View style={styles.container}>
+      <View
+        style={[
+          styles.barContainer,
+          {
+            backgroundColor: Colors.border,
+            borderRadius: height / 2,
+            height,
+          },
+        ]}
+      >
+        <View
           style={[
-            styles.progressContainer,
+            styles.filledBar,
             {
-              width: animatedWidth.interpolate({
-                inputRange: [0, 100],
-                outputRange: ['0%', '100%'],
-              }),
+              width: `${percentage}%`,
+              backgroundColor: color,
+              borderRadius: height / 2,
             },
           ]}
-        >
-          <LinearGradient
-            colors={[Colors.gradient.primary[0], Colors.gradient.primary[1]]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.progress}
-          />
-        </Animated.View>
+        />
       </View>
       {showLabel && (
         <Text style={styles.label}>
@@ -65,24 +55,18 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
   },
-  track: {
+  barContainer: {
     width: '100%',
-    backgroundColor: Colors.border,
-    borderRadius: 100,
     overflow: 'hidden',
   },
-  progressContainer: {
+  filledBar: {
     height: '100%',
-  },
-  progress: {
-    height: '100%',
-    borderRadius: 100,
   },
   label: {
     marginTop: 8,
-    fontSize: 12,
-    color: Colors.textSecondary,
+    fontSize: 14,
     fontWeight: '600' as const,
-    textAlign: 'right',
+    color: Colors.textSecondary,
+    textAlign: 'center' as const,
   },
 });
