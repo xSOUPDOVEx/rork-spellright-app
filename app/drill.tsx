@@ -584,6 +584,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 6,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   keyDisabled: {
     opacity: 0.4,
