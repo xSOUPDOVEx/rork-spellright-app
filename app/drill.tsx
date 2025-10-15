@@ -69,15 +69,17 @@ export default function DrillScreen() {
     }
     
     Animated.sequence([
-      Animated.timing(keyAnimations[key], {
-        toValue: 0.85,
-        duration: 50,
+      Animated.spring(keyAnimations[key], {
+        toValue: 0.92,
         useNativeDriver: true,
+        speed: 50,
+        bounciness: 0,
       }),
-      Animated.timing(keyAnimations[key], {
+      Animated.spring(keyAnimations[key], {
         toValue: 1,
-        duration: 100,
         useNativeDriver: true,
+        speed: 20,
+        bounciness: 8,
       }),
     ]).start();
   };
@@ -147,13 +149,13 @@ export default function DrillScreen() {
 
     Animated.sequence([
       Animated.timing(fadeAnim, {
-        toValue: 0.5,
-        duration: 200,
+        toValue: 0,
+        duration: 150,
         useNativeDriver: true,
       }),
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 200,
+        duration: 300,
         useNativeDriver: true,
       }),
     ]).start();
@@ -409,11 +411,13 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 24,
+    justifyContent: 'space-between',
   },
   wordContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 16,
   },
   feedbackContainer: {
     alignItems: 'center',
@@ -425,7 +429,12 @@ const styles = StyleSheet.create({
     borderRadius: 48,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
+    shadowColor: 'rgba(0, 0, 0, 0.15)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 6,
   },
   correctBadge: {
     backgroundColor: Colors.success,
@@ -446,15 +455,15 @@ const styles = StyleSheet.create({
   },
   hintContainer: {
     backgroundColor: Colors.white,
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 16,
-    marginBottom: 32,
+    marginBottom: 24,
     maxWidth: '100%',
     shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowRadius: 8,
+    elevation: 3,
   },
   hintLabel: {
     fontSize: 14,
@@ -471,7 +480,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 6,
-    marginBottom: 32,
+    marginBottom: 16,
     paddingHorizontal: 8,
   },
   letterBox: {
@@ -500,7 +509,7 @@ const styles = StyleSheet.create({
   feedbackText: {
     fontSize: 32,
     fontWeight: '700' as const,
-    marginBottom: 24,
+    marginBottom: 16,
   },
   correctText: {
     color: Colors.success,
@@ -510,7 +519,7 @@ const styles = StyleSheet.create({
   },
   correctAnswer: {
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 8,
   },
   correctAnswerLabel: {
     fontSize: 16,
@@ -527,7 +536,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
-    marginTop: 8,
+    marginTop: 4,
+    shadowColor: Colors.success,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   xpText: {
     fontSize: 18,
@@ -536,17 +550,17 @@ const styles = StyleSheet.create({
   },
   tipContainer: {
     backgroundColor: Colors.backgroundSecondary,
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 16,
-    marginTop: 16,
+    marginTop: 12,
     maxWidth: '90%',
     borderWidth: 1,
     borderColor: Colors.border,
     shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowRadius: 8,
+    elevation: 3,
   },
   tipLabel: {
     fontSize: 14,
@@ -560,29 +574,31 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   keyboardContainer: {
-    paddingBottom: 8,
+    paddingBottom: 12,
     gap: 8,
   },
   keyboardRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 6,
+    height: 48,
   },
   spacer: {
     width: 16,
   },
   key: {
-    minWidth: 30,
+    minWidth: 32,
+    flex: 1,
+    maxWidth: 42,
     height: 48,
     backgroundColor: Colors.white,
-    borderRadius: 12,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
-    shadowRadius: 6,
+    shadowRadius: 4,
     elevation: 2,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -597,11 +613,18 @@ const styles = StyleSheet.create({
   },
   backspaceKey: {
     flex: 1.5,
+    maxWidth: 1000,
     backgroundColor: Colors.backgroundSecondary,
   },
   submitKey: {
     flex: 3,
+    maxWidth: 1000,
     backgroundColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   submitKeyDisabled: {
     backgroundColor: Colors.border,
