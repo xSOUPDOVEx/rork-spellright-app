@@ -3,9 +3,10 @@ import Colors from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 import { mockWords, Word } from '@/mocks/words';
 import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import { Check, Delete, X } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Animated, Dimensions, Platform, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const KEYBOARD_ROWS = [
@@ -81,12 +82,18 @@ export default function DrillScreen() {
 
   const handleKeyPress = (key: string) => {
     if (showFeedback) return;
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     animateKeyPress(key);
     setUserInput(prev => prev + key.toLowerCase());
   };
 
   const handleBackspace = () => {
     if (showFeedback) return;
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     animateKeyPress('backspace');
     setUserInput(prev => prev.slice(0, -1));
   };
@@ -99,6 +106,14 @@ export default function DrillScreen() {
     setIsCorrect(correct);
     setShowFeedback(true);
     setResults([...results, { word: currentWord, correct }]);
+
+    if (Platform.OS !== 'web') {
+      if (correct) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+    }
 
     // Play pronunciation audio if voice is enabled
     if (settings.voiceEnabled && correct) {
