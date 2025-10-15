@@ -159,7 +159,15 @@ export default function DrillScreen() {
     return (
       <View style={styles.container}>
         <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-          <Text style={styles.loadingText}>Loading...</Text>
+          <View style={styles.loadingContainer}>
+            <View style={styles.loadingCard}>
+              <Text style={styles.loadingEmoji}>📚</Text>
+              <Text style={styles.loadingText}>Preparing your words...</Text>
+              <View style={styles.loadingBar}>
+                <View style={styles.loadingBarFill} />
+              </View>
+            </View>
+          </View>
         </SafeAreaView>
       </View>
     );
@@ -577,10 +585,47 @@ const styles = StyleSheet.create({
     color: Colors.white,
     letterSpacing: 0.5,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  loadingCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    padding: 32,
+    alignItems: 'center',
+    shadowColor: 'rgba(0, 0, 0, 0.08)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 4,
+    width: '100%',
+    maxWidth: 320,
+  },
+  loadingEmoji: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
   loadingText: {
     fontSize: 18,
-    color: Colors.textSecondary,
+    color: Colors.text,
     textAlign: 'center',
-    marginTop: 100,
+    marginBottom: 24,
+    fontWeight: '600' as const,
+  },
+  loadingBar: {
+    width: '100%',
+    height: 4,
+    backgroundColor: Colors.border,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  loadingBarFill: {
+    width: '60%',
+    height: '100%',
+    backgroundColor: Colors.primary,
+    borderRadius: 2,
   },
 });
