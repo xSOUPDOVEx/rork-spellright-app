@@ -8,6 +8,7 @@ import { Check, Delete, X } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, Platform, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ConfettiCannon from 'react-native-confetti-cannon';
 
 const KEYBOARD_ROWS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -49,6 +50,7 @@ export default function DrillScreen() {
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
   const [words, setWords] = useState<Word[]>([]);
   const [tip, setTip] = useState<string>('');
+  const [showConfetti, setShowConfetti] = useState(false);
   const fadeAnim = useState(new Animated.Value(1))[0];
   const keyAnimations = useRef<{ [key: string]: Animated.Value }>({}).current;
 
@@ -125,6 +127,8 @@ export default function DrillScreen() {
     if (correct) {
       addXP(10);
       incrementWordsLearned();
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000);
     } else {
       // TODO: Replace with actual Claude API call in Cursor
       // This will be integrated with Anthropic SDK
@@ -191,6 +195,13 @@ export default function DrillScreen() {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+        {showConfetti && (
+          <ConfettiCannon
+            count={50}
+            origin={{ x: SCREEN_WIDTH / 2, y: 0 }}
+            fadeOut
+          />
+        )}
         <View style={styles.header}>
           <View style={styles.progressBar}>
             <View
