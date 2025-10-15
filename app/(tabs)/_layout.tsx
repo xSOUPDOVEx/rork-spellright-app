@@ -12,14 +12,20 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: Colors.white,
-          borderTopWidth: 0,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          shadowColor: 'rgba(0, 0, 0, 0.08)',
-          shadowOffset: { width: 0, height: -4 },
+          borderTopWidth: 1,
+          borderTopColor: Colors.border,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
+          shadowColor: 'rgba(0, 0, 0, 0.05)',
+          shadowOffset: { width: 0, height: -2 },
           shadowOpacity: 1,
-          shadowRadius: 12,
+          shadowRadius: 8,
           elevation: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600' as const,
         },
       }}
     >

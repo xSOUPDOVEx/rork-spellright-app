@@ -1,150 +1,238 @@
-import Button from '@/components/Button';
 import Card from '@/components/Card';
-import ProgressBar from '@/components/ProgressBar';
+import LessonCard from '@/components/LessonCard';
 import Colors from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Crown, Flame, Play, Sparkles } from 'lucide-react-native';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BookOpen, Crown, Flame, Search, Sparkles } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+interface Lesson {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: string;
+  color: string;
+  gradientColors: [string, string];
+  isPremium: boolean;
+  progress?: number;
+  route: string;
+  variant: 'style1' | 'style2' | 'style3';
+}
+
 export default function HomeScreen() {
-  const { userName, stats, settings } = useApp();
+  const { stats, settings } = useApp();
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'popular' | 'my' | 'bookmarks'>('popular');
 
-  const xpForNextLevel = stats.level * 100;
-  const xpProgress = stats.totalXP % 100;
 
-  const handleStartPractice = () => {
-    router.push('/drill' as any);
+
+  const lessons: Lesson[] = [
+    {
+      id: '1',
+      title: 'Daily Spelling Drill',
+      subtitle: 'Practice core words',
+      icon: '✏️',
+      color: Colors.courses.blue,
+      gradientColors: Colors.gradient.blue as [string, string],
+      isPremium: false,
+      progress: 65,
+      route: '/drill',
+      variant: 'style1',
+    },
+    {
+      id: '2',
+      title: 'Pattern Recognition',
+      subtitle: 'Learn spelling patterns',
+      icon: '🧩',
+      color: Colors.courses.pink,
+      gradientColors: Colors.gradient.pink as [string, string],
+      isPremium: true,
+      progress: 40,
+      route: '/teaching',
+      variant: 'style2',
+    },
+    {
+      id: '3',
+      title: 'Word Families',
+      subtitle: 'Group similar words',
+      icon: '👨‍👩‍👧‍👦',
+      color: Colors.courses.orange,
+      gradientColors: Colors.gradient.orange as [string, string],
+      isPremium: false,
+      progress: 80,
+      route: '/teaching',
+      variant: 'style3',
+    },
+    {
+      id: '4',
+      title: 'Memory Challenge',
+      subtitle: 'Test your recall',
+      icon: '🧠',
+      color: Colors.courses.purple,
+      gradientColors: Colors.gradient.purple as [string, string],
+      isPremium: true,
+      route: '/testing',
+      variant: 'style1',
+    },
+    {
+      id: '5',
+      title: 'Flashcard Review',
+      subtitle: 'Spaced repetition',
+      icon: '🎴',
+      color: Colors.courses.green,
+      gradientColors: Colors.gradient.green as [string, string],
+      isPremium: false,
+      progress: 55,
+      route: '/spaced-repetition',
+      variant: 'style2',
+    },
+    {
+      id: '6',
+      title: 'Advanced Words',
+      subtitle: 'Challenge yourself',
+      icon: '🚀',
+      color: Colors.courses.yellow,
+      gradientColors: Colors.gradient.warning as [string, string],
+      isPremium: true,
+      route: '/drill',
+      variant: 'style3',
+    },
+  ];
+
+  const handleLessonPress = (lesson: Lesson) => {
+    if (lesson.isPremium && !settings.isPremium) {
+      router.push('/subscription' as any);
+    } else {
+      router.push(lesson.route as any);
+    }
   };
 
   const handleUpgrade = () => {
     router.push('/subscription' as any);
   };
 
+  const filteredLessons = lessons.filter(lesson =>
+    lesson.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    lesson.subtitle.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={[Colors.gradient.primary[0], Colors.gradient.primary[1]]}
-        style={styles.headerGradient}
-      >
-        <SafeAreaView edges={['top']} style={styles.header}>
-          <View style={styles.headerContent}>
+      <SafeAreaView edges={['top']} style={styles.safeArea}>
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
             <View>
-              <Text style={styles.greeting}>Hello, {userName}!</Text>
-              <Text style={styles.subtitle}>Ready to practice?</Text>
+              <Text style={styles.greeting}>Lessons</Text>
             </View>
-            {!settings.isPremium && (
-              <TouchableOpacity onPress={handleUpgrade} style={styles.premiumBadge} testID="premium-badge">
-                <Crown size={20} color={Colors.warning} />
-                <Text style={styles.premiumText}>Go Premium</Text>
+            <View style={styles.headerIcons}>
+              {!settings.isPremium && (
+                <TouchableOpacity onPress={handleUpgrade} style={styles.premiumBadge} testID="premium-badge">
+                  <Crown size={16} color={Colors.warning} />
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity style={styles.iconButton}>
+                <Search size={20} color={Colors.text} />
               </TouchableOpacity>
-            )}
+            </View>
           </View>
-        </SafeAreaView>
-      </LinearGradient>
+
+          <View style={styles.searchContainer}>
+            <Search size={18} color={Colors.textLight} style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search lessons..."
+              placeholderTextColor={Colors.textLight}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+
+          <View style={styles.tabs}>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'popular' && styles.tabActive]}
+              onPress={() => setActiveTab('popular')}
+            >
+              <Text style={[styles.tabText, activeTab === 'popular' && styles.tabTextActive]}>Popular</Text>
+              {activeTab === 'popular' && <View style={styles.tabIndicator} />}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'my' && styles.tabActive]}
+              onPress={() => setActiveTab('my')}
+            >
+              <Text style={[styles.tabText, activeTab === 'my' && styles.tabTextActive]}>My Lessons</Text>
+              {activeTab === 'my' && <View style={styles.tabIndicator} />}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'bookmarks' && styles.tabActive]}
+              onPress={() => setActiveTab('bookmarks')}
+            >
+              <Text style={[styles.tabText, activeTab === 'bookmarks' && styles.tabTextActive]}>Bookmarks</Text>
+              {activeTab === 'bookmarks' && <View style={styles.tabIndicator} />}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.statsContainer}>
-          <Card style={styles.levelCard}>
-            <View style={styles.levelHeader}>
-              <View style={styles.levelBadge}>
-                <Sparkles size={24} color={Colors.primary} />
+        <View style={styles.statsRow}>
+          <Card style={styles.statCard}>
+            <View style={styles.statContent}>
+              <View style={styles.statIconContainer}>
+                <Sparkles size={20} color={Colors.primary} />
               </View>
-              <View style={styles.levelInfo}>
-                <Text style={styles.levelLabel}>Level {stats.level}</Text>
-                <Text style={styles.xpText}>{xpProgress} / {xpForNextLevel} XP</Text>
+              <View>
+                <Text style={styles.statLabel}>Level</Text>
+                <Text style={styles.statValue}>{stats.level}</Text>
               </View>
             </View>
-            <ProgressBar progress={xpProgress} total={xpForNextLevel} showLabel={false} height={8} />
           </Card>
 
-          <View style={styles.statsRow}>
-            <Card style={styles.statCard}>
-              <View style={styles.statIcon}>
-                <Flame size={24} color={Colors.warning} />
+          <Card style={styles.statCard}>
+            <View style={styles.statContent}>
+              <View style={styles.statIconContainer}>
+                <Flame size={20} color={Colors.warning} />
               </View>
-              <Text style={styles.statValue}>{stats.currentStreak}</Text>
-              <Text style={styles.statLabel}>Day Streak</Text>
-            </Card>
+              <View>
+                <Text style={styles.statLabel}>Streak</Text>
+                <Text style={styles.statValue}>{stats.currentStreak}</Text>
+              </View>
+            </View>
+          </Card>
 
-            <Card style={styles.statCard}>
-              <View style={styles.statIcon}>
-                <Text style={styles.statEmoji}>📚</Text>
+          <Card style={styles.statCard}>
+            <View style={styles.statContent}>
+              <View style={styles.statIconContainer}>
+                <BookOpen size={20} color={Colors.success} />
               </View>
-              <Text style={styles.statValue}>{stats.wordsLearned}</Text>
-              <Text style={styles.statLabel}>Words Learned</Text>
-            </Card>
-
-            <Card style={styles.statCard}>
-              <View style={styles.statIcon}>
-                <Text style={styles.statEmoji}>🎯</Text>
+              <View>
+                <Text style={styles.statLabel}>Words</Text>
+                <Text style={styles.statValue}>{stats.wordsLearned}</Text>
               </View>
-              <Text style={styles.statValue}>{stats.accuracy}%</Text>
-              <Text style={styles.statLabel}>Accuracy</Text>
-            </Card>
-          </View>
+            </View>
+          </Card>
         </View>
 
-        <View style={styles.practiceSection}>
-          <Text style={styles.sectionTitle}>Daily Practice</Text>
-          <Card style={styles.practiceCard}>
-            <View style={styles.practiceContent}>
-              <View style={styles.practiceIcon}>
-                <Play size={32} color={Colors.white} fill={Colors.white} />
-              </View>
-              <View style={styles.practiceInfo}>
-                <Text style={styles.practiceTitle}>Start Spelling Drill</Text>
-                <Text style={styles.practiceDescription}>
-                  Practice {settings.difficulty === 'mixed' ? 'mixed difficulty' : settings.difficulty} words
-                </Text>
-              </View>
-            </View>
-            <Button title="Start Practice" onPress={handleStartPractice} testID="start-practice-button" />
-          </Card>
-
-          <Card style={styles.goalCard}>
-            <View style={styles.goalHeader}>
-              <Text style={styles.goalTitle}>Daily Goal</Text>
-              <Text style={styles.goalValue}>{stats.totalXP % settings.dailyGoal} / {settings.dailyGoal} XP</Text>
-            </View>
-            <ProgressBar 
-              progress={stats.totalXP % settings.dailyGoal} 
-              total={settings.dailyGoal} 
-              showLabel={false}
-              height={8}
+        <View style={styles.lessonsGrid}>
+          {filteredLessons.map((lesson, index) => (
+            <LessonCard
+              key={lesson.id}
+              title={lesson.title}
+              subtitle={lesson.subtitle}
+              icon={lesson.icon}
+              color={lesson.color}
+              gradientColors={lesson.gradientColors}
+              isPremium={lesson.isPremium}
+              isLocked={lesson.isPremium && !settings.isPremium}
+              progress={lesson.progress}
+              onPress={() => handleLessonPress(lesson)}
+              style={index % 2 === 0 ? styles.lessonCardLeft : styles.lessonCardRight}
+              variant={lesson.variant}
             />
-            <Text style={styles.goalDescription}>
-              {stats.totalXP % settings.dailyGoal >= settings.dailyGoal 
-                ? '🎉 Goal completed! Keep going!' 
-                : `${settings.dailyGoal - (stats.totalXP % settings.dailyGoal)} XP to reach your daily goal`}
-            </Text>
-          </Card>
+          ))}
         </View>
-
-        {!settings.isPremium && (
-          <Card style={styles.upgradeCard}>
-            <LinearGradient
-              colors={[Colors.gradient.warning[0], Colors.gradient.warning[1]]}
-              style={styles.upgradeGradient}
-            >
-              <Crown size={32} color={Colors.white} />
-              <Text style={styles.upgradeTitle}>Unlock Premium</Text>
-              <Text style={styles.upgradeDescription}>
-                Get unlimited practice, advanced analytics, and personalized learning paths
-              </Text>
-              <Button 
-                title="Upgrade Now" 
-                onPress={handleUpgrade} 
-                variant="secondary"
-                testID="upgrade-button"
-              />
-            </LinearGradient>
-          </Card>
-        )}
 
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -157,216 +245,133 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  headerGradient: {
-    paddingBottom: 24,
+  safeArea: {
+    backgroundColor: Colors.white,
   },
   header: {
     paddingHorizontal: 24,
-    paddingTop: 16,
+    paddingBottom: 16,
+    backgroundColor: Colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
   },
-  headerContent: {
+  headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 16,
   },
   greeting: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: '700' as const,
-    color: Colors.white,
-    marginBottom: 4,
+    color: Colors.text,
   },
-  subtitle: {
-    fontSize: 16,
-    color: Colors.white,
-    opacity: 0.9,
+  headerIcons: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
   },
   premiumBadge: {
+    backgroundColor: Colors.backgroundSecondary,
+    padding: 10,
+    borderRadius: 12,
+  },
+  iconButton: {
+    backgroundColor: Colors.backgroundSecondary,
+    padding: 10,
+    borderRadius: 12,
+  },
+  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 2,
+    backgroundColor: Colors.backgroundSecondary,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 16,
   },
-  premiumText: {
-    color: Colors.white,
-    fontSize: 14,
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: Colors.text,
+  },
+  tabs: {
+    flexDirection: 'row',
+    gap: 24,
+  },
+  tab: {
+    paddingVertical: 8,
+    position: 'relative',
+  },
+  tabActive: {},
+  tabText: {
+    fontSize: 16,
+    color: Colors.textLight,
+    fontWeight: '500' as const,
+  },
+  tabTextActive: {
+    color: Colors.text,
     fontWeight: '600' as const,
+  },
+  tabIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    backgroundColor: Colors.primary,
+    borderRadius: 2,
   },
   content: {
     flex: 1,
-    marginTop: -16,
-  },
-  statsContainer: {
-    paddingHorizontal: 24,
-    marginBottom: 24,
-  },
-  levelCard: {
-    marginBottom: 16,
-  },
-  levelHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    gap: 12,
-  },
-  levelBadge: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: Colors.backgroundSecondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  levelInfo: {
-    flex: 1,
-  },
-  levelLabel: {
-    fontSize: 20,
-    fontWeight: '700' as const,
-    color: Colors.text,
-    marginBottom: 2,
-  },
-  xpText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
   },
   statsRow: {
     flexDirection: 'row',
     gap: 12,
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    marginBottom: 20,
   },
   statCard: {
     flex: 1,
-    alignItems: 'center',
-    paddingVertical: 16,
+    padding: 12,
   },
-  statIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  statContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  statIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     backgroundColor: Colors.backgroundSecondary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  statEmoji: {
-    fontSize: 20,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: '700' as const,
-    color: Colors.text,
-    marginBottom: 2,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: Colors.textSecondary,
-    textAlign: 'center',
+    marginBottom: 2,
   },
-  practiceSection: {
-    paddingHorizontal: 24,
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700' as const,
-    color: Colors.text,
-    marginBottom: 16,
-  },
-  practiceCard: {
-    marginBottom: 16,
-  },
-  practiceContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    marginBottom: 20,
-  },
-  practiceIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: Colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  practiceInfo: {
-    flex: 1,
-  },
-  practiceTitle: {
+  statValue: {
     fontSize: 18,
-    fontWeight: '600' as const,
-    color: Colors.text,
-    marginBottom: 4,
-  },
-  practiceDescription: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-  },
-  goalCard: {},
-  goalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  goalTitle: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: Colors.text,
-  },
-  goalValue: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: Colors.primary,
-  },
-  goalDescription: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginTop: 8,
-  },
-  upgradeCard: {
-    marginHorizontal: 24,
-    padding: 0,
-    overflow: 'hidden',
-  },
-  upgradeGradient: {
-    padding: 24,
-    alignItems: 'center',
-  },
-  upgradeTitle: {
-    fontSize: 24,
     fontWeight: '700' as const,
-    color: Colors.white,
-    marginTop: 12,
-    marginBottom: 8,
+    color: Colors.text,
   },
-  upgradeDescription: {
-    fontSize: 14,
-    color: Colors.white,
-    textAlign: 'center',
-    marginBottom: 20,
-    opacity: 0.9,
+  lessonsGrid: {
+    paddingHorizontal: 24,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+  },
+  lessonCardLeft: {
+    width: '48%',
+  },
+  lessonCardRight: {
+    width: '48%',
   },
 });
