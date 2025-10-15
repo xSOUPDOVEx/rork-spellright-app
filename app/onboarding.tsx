@@ -129,9 +129,9 @@ export default function OnboardingScreen() {
             {step === 2 && (
               <View style={styles.content}>
                 <View style={styles.header}>
-                  <Text style={styles.title}>What&apos;s your name?</Text>
+                  <Text style={styles.title}>What's your name?</Text>
                   <Text style={styles.subtitle}>
-                    Let&apos;s personalize your learning experience
+                    Let's personalize your learning experience
                   </Text>
                 </View>
 
