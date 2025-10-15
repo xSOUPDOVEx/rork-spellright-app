@@ -100,6 +100,13 @@ export default function DrillScreen() {
     setShowFeedback(true);
     setResults([...results, { word: currentWord, correct }]);
 
+    // Play pronunciation audio if voice is enabled
+    if (settings.voiceEnabled && correct) {
+      // TODO: Integrate ElevenLabs TTS in Cursor
+      // await playWordAudio(currentWord.word);
+      console.log('Voice feedback enabled - will play:', currentWord.word);
+    }
+
     if (correct) {
       addXP(10);
       incrementWordsLearned();
