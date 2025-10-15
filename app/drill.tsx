@@ -69,17 +69,16 @@ export default function DrillScreen() {
     }
     
     Animated.sequence([
-      Animated.spring(keyAnimations[key], {
-        toValue: 0.92,
+      Animated.timing(keyAnimations[key], {
+        toValue: 0.94,
+        duration: 50,
         useNativeDriver: true,
-        speed: 50,
-        bounciness: 0,
       }),
       Animated.spring(keyAnimations[key], {
         toValue: 1,
         useNativeDriver: true,
-        speed: 20,
-        bounciness: 8,
+        speed: 100,
+        bounciness: 4,
       }),
     ]).start();
   };
