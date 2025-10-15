@@ -104,6 +104,9 @@ export default function DrillScreen() {
       addXP(10);
       incrementWordsLearned();
     } else {
+      // TODO: Replace with actual Claude API call in Cursor
+      // This will be integrated with Anthropic SDK
+      // Future: const tip = await getAIFeedback(userInput, currentWord.word);
       const mockTips = [
         "Remember: I before E except after C",
         "Double letters are common in English",
