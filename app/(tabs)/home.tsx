@@ -273,11 +273,34 @@ export default function HomeScreen() {
           )}
 
           {activeTab === 'practice' && (
-            <View style={styles.tabContent}>
-              <Text style={styles.comingSoonText}>Practice content coming soon!</Text>
-              <Text style={styles.comingSoonSubtext}>
-                This tab will show your saved lessons and quick practice options.
-              </Text>
+            <View style={styles.practiceContent}>
+              <TouchableOpacity
+                style={styles.practiceCard}
+                onPress={() => router.push('/patterns' as any)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.practiceCardLeft}>
+                  <View style={styles.practiceIconContainer}>
+                    <Text style={styles.practiceIcon}>🎯</Text>
+                  </View>
+                </View>
+                <View style={styles.practiceCardRight}>
+                  <Text style={styles.practiceCardTitle}>Spelling Patterns</Text>
+                  <Text style={styles.practiceCardSubtitle}>
+                    Master different spelling rules
+                  </Text>
+                  <View style={styles.practiceCardStats}>
+                    <Text style={styles.practiceCardStat}>8 patterns available</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+
+              <View style={styles.comingSoonCard}>
+                <Text style={styles.comingSoonText}>More practice modes coming soon!</Text>
+                <Text style={styles.comingSoonSubtext}>
+                  Timed challenges, word games, and more.
+                </Text>
+              </View>
             </View>
           )}
 
@@ -636,6 +659,70 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 4,
+  },
+  practiceContent: {
+    gap: 16,
+  },
+  practiceCard: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  practiceCardLeft: {
+    marginRight: 16,
+    justifyContent: 'center',
+  },
+  practiceIconContainer: {
+    width: 70,
+    height: 70,
+    borderRadius: 16,
+    backgroundColor: Colors.primary + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  practiceIcon: {
+    fontSize: 36,
+  },
+  practiceCardRight: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: 4,
+  },
+  practiceCardTitle: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: Colors.text,
+  },
+  practiceCardSubtitle: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    marginBottom: 4,
+  },
+  practiceCardStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  practiceCardStat: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: Colors.primary,
+  },
+  comingSoonCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
   },
   comingSoonText: {
     fontSize: 18,
