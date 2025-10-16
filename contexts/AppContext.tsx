@@ -2,11 +2,14 @@ import createContextHook from '@nkzw/create-context-hook';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+export type SkillLevel = 'beginner' | 'intermediate' | 'advanced';
+
 export type UserSettings = {
   voiceEnabled: boolean;
   difficulty: 'easy' | 'medium' | 'hard' | 'mixed';
   dailyGoal: number;
   isPremium: boolean;
+  initialLevel: SkillLevel;
 };
 
 export type UserStats = {
@@ -23,7 +26,7 @@ export type AppState = {
   userName: string;
   settings: UserSettings;
   stats: UserStats;
-  setOnboarded: (name: string) => void;
+  setOnboarded: (name: string, level: SkillLevel) => void;
   updateSettings: (settings: Partial<UserSettings>) => void;
   addXP: (xp: number) => void;
   updateStreak: () => void;
@@ -44,6 +47,7 @@ const defaultSettings: UserSettings = {
   difficulty: 'mixed',
   dailyGoal: 50,
   isPremium: false,
+  initialLevel: 'beginner',
 };
 
 const defaultStats: UserStats = {
@@ -83,18 +87,21 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   };
 
-  const setOnboarded = useCallback(async (name: string) => {
+  const setOnboarded = useCallback(async (name: string, level: SkillLevel) => {
     try {
+      const updatedSettings = { ...settings, initialLevel: level };
       await AsyncStorage.multiSet([
         [STORAGE_KEYS.ONBOARDED, 'true'],
         [STORAGE_KEYS.USER_NAME, name],
+        [STORAGE_KEYS.SETTINGS, JSON.stringify(updatedSettings)],
       ]);
       setIsOnboarded(true);
       setUserName(name);
+      setSettings(updatedSettings);
     } catch (error) {
       console.error('Error saving onboarding:', error);
     }
-  }, []);
+  }, [settings]);
 
   const updateSettings = useCallback(async (newSettings: Partial<UserSettings>) => {
     try {
