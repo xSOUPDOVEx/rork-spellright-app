@@ -29,6 +29,7 @@ export type AppState = {
   userName: string;
   settings: UserSettings;
   stats: UserStats;
+  themeVersion: number;
   setOnboarded: (name: string, level: SkillLevel) => void;
   updateSettings: (settings: Partial<UserSettings>) => void;
   addXP: (xp: number) => void;
@@ -71,6 +72,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [userName, setUserName] = useState<string>('');
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [stats, setStats] = useState<UserStats>(defaultStats);
+  const [themeVersion, setThemeVersion] = useState<number>(0);
 
   useEffect(() => {
     loadData();
@@ -192,6 +194,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       await AsyncStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
       setSettings(updated);
       updateTheme(theme, accentColor || null);
+      setThemeVersion(prev => prev + 1);
     } catch (error) {
       console.error('Error updating theme:', error);
     }
@@ -202,6 +205,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     userName,
     settings,
     stats,
+    themeVersion,
     setOnboarded,
     updateSettings,
     addXP,
@@ -209,5 +213,5 @@ export const [AppProvider, useApp] = createContextHook(() => {
     incrementWordsLearned,
     updateAccuracy,
     updateThemeSettings,
-  }), [isOnboarded, userName, settings, stats, setOnboarded, updateSettings, addXP, updateStreak, incrementWordsLearned, updateAccuracy, updateThemeSettings]);
+  }), [isOnboarded, userName, settings, stats, themeVersion, setOnboarded, updateSettings, addXP, updateStreak, incrementWordsLearned, updateAccuracy, updateThemeSettings]);
 });

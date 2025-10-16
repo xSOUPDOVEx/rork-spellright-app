@@ -4,14 +4,15 @@ import Colors, { THEMES, ACCENT_COLORS, type ThemeType, type AccentColor } from 
 import { useApp } from '@/contexts/AppContext';
 import { useRouter } from 'expo-router';
 import { ChevronRight, Crown, Volume2, VolumeX, Check } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SettingsScreen() {
-  const { userName, settings, updateSettings, updateThemeSettings } = useApp();
+  const { userName, settings, updateSettings, updateThemeSettings, themeVersion } = useApp();
   const router = useRouter();
-  const [forceUpdate, setForceUpdate] = useState<number>(0);
+
+  const styles = useMemo(() => createStyles(), [themeVersion]);
 
   const difficulties = [
     { value: 'easy' as const, label: 'Easy' },
@@ -73,7 +74,6 @@ export default function SettingsScreen() {
                     ]}
                     onPress={() => {
                       updateThemeSettings(themeKey, settings.accentColor);
-                      setForceUpdate(prev => prev + 1);
                     }}
                     testID={`theme-${themeKey}`}
                   >
@@ -105,7 +105,6 @@ export default function SettingsScreen() {
                     ]}
                     onPress={() => {
                       updateThemeSettings(settings.theme, accent.color);
-                      setForceUpdate(prev => prev + 1);
                     }}
                     testID={`accent-${accent.name}`}
                   >
@@ -120,7 +119,6 @@ export default function SettingsScreen() {
               style={styles.resetButton}
               onPress={() => {
                 updateThemeSettings(settings.theme, null);
-                setForceUpdate(prev => prev + 1);
               }}
             >
               <Text style={styles.resetButtonText}>Reset to Theme Default</Text>
@@ -247,256 +245,260 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  safeArea: {
-    backgroundColor: Colors.white,
-  },
-  header: {
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700' as const,
-    color: Colors.text,
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-  },
-  content: {
-    flex: 1,
-  },
-  profileCard: {
-    margin: 24,
-    marginBottom: 16,
-  },
-  profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    marginBottom: 20,
-  },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: Colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  avatarText: {
-    fontSize: 28,
-    fontWeight: '700' as const,
-    color: Colors.white,
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  profileName: {
-    fontSize: 20,
-    fontWeight: '600' as const,
-    color: Colors.text,
-    marginBottom: 4,
-  },
-  profileStatus: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-  },
-  section: {
-    paddingHorizontal: 24,
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600' as const,
-    color: Colors.text,
-    marginBottom: 12,
-  },
-  settingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  settingHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  settingLabel: {
-    fontSize: 16,
-    color: Colors.text,
-  },
-  cardMargin: {
-    marginTop: 12,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: Colors.text,
-    marginBottom: 16,
-  },
-  optionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  optionButton: {
-    flex: 1,
-    minWidth: '22%',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    backgroundColor: Colors.backgroundSecondary,
-    alignItems: 'center',
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  optionButtonActive: {
-    backgroundColor: Colors.primary,
-  },
-  optionText: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: Colors.text,
-  },
-  optionTextActive: {
-    color: Colors.white,
-  },
-  premiumCard: {
-    marginHorizontal: 24,
-    marginBottom: 24,
-  },
-  premiumHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 12,
-  },
-  premiumTitle: {
-    fontSize: 20,
-    fontWeight: '700' as const,
-    color: Colors.text,
-  },
-  premiumDescription: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginBottom: 20,
-    lineHeight: 20,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  menuLabel: {
-    fontSize: 16,
-    color: Colors.text,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.border,
-  },
-  themeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  themeOption: {
-    flex: 1,
-    minWidth: '45%',
-    aspectRatio: 1.2,
-    borderRadius: 16,
-    padding: 16,
-    justifyContent: 'space-between',
-    borderWidth: 2,
-    borderColor: 'transparent',
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  themeOptionSelected: {
-    borderColor: Colors.primary,
-    shadowColor: Colors.primary,
-    shadowOpacity: 0.3,
-  },
-  themeSwatch: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    shadowColor: 'rgba(0, 0, 0, 0.15)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  checkmarkContainer: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: Colors.success,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  themeLabel: {
-    fontSize: 13,
-    fontWeight: '600' as const,
-    marginTop: 8,
-  },
-  accentGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 16,
-  },
-  accentOption: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: 'transparent',
-    shadowColor: 'rgba(0, 0, 0, 0.15)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  accentOptionSelected: {
-    borderColor: Colors.white,
-    shadowColor: 'rgba(0, 0, 0, 0.3)',
-    shadowOpacity: 1,
-  },
-  resetButton: {
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  resetButtonText: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: Colors.primary,
-  },
-});
+
+
+function createStyles() {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: Colors.background,
+    },
+    safeArea: {
+      backgroundColor: Colors.white,
+    },
+    header: {
+      paddingHorizontal: 24,
+      paddingVertical: 20,
+      backgroundColor: Colors.white,
+      borderBottomWidth: 1,
+      borderBottomColor: Colors.border,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: '700' as const,
+      color: Colors.text,
+      marginBottom: 4,
+    },
+    subtitle: {
+      fontSize: 14,
+      color: Colors.textSecondary,
+    },
+    content: {
+      flex: 1,
+    },
+    profileCard: {
+      margin: 24,
+      marginBottom: 16,
+    },
+    profileHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 16,
+      marginBottom: 20,
+    },
+    avatar: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: Colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: 'rgba(0, 0, 0, 0.08)',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 1,
+      shadowRadius: 12,
+      elevation: 4,
+    },
+    avatarText: {
+      fontSize: 28,
+      fontWeight: '700' as const,
+      color: Colors.white,
+    },
+    profileInfo: {
+      flex: 1,
+    },
+    profileName: {
+      fontSize: 20,
+      fontWeight: '600' as const,
+      color: Colors.text,
+      marginBottom: 4,
+    },
+    profileStatus: {
+      fontSize: 14,
+      color: Colors.textSecondary,
+    },
+    section: {
+      paddingHorizontal: 24,
+      marginBottom: 24,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: '600' as const,
+      color: Colors.text,
+      marginBottom: 12,
+    },
+    settingItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    settingHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    settingLabel: {
+      fontSize: 16,
+      color: Colors.text,
+    },
+    cardMargin: {
+      marginTop: 12,
+    },
+    cardTitle: {
+      fontSize: 16,
+      fontWeight: '600' as const,
+      color: Colors.text,
+      marginBottom: 16,
+    },
+    optionsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+    },
+    optionButton: {
+      flex: 1,
+      minWidth: '22%',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 12,
+      backgroundColor: Colors.backgroundSecondary,
+      alignItems: 'center',
+      shadowColor: 'rgba(0, 0, 0, 0.08)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1,
+      shadowRadius: 6,
+      elevation: 2,
+    },
+    optionButtonActive: {
+      backgroundColor: Colors.primary,
+    },
+    optionText: {
+      fontSize: 14,
+      fontWeight: '600' as const,
+      color: Colors.text,
+    },
+    optionTextActive: {
+      color: Colors.white,
+    },
+    premiumCard: {
+      marginHorizontal: 24,
+      marginBottom: 24,
+    },
+    premiumHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      marginBottom: 12,
+    },
+    premiumTitle: {
+      fontSize: 20,
+      fontWeight: '700' as const,
+      color: Colors.text,
+    },
+    premiumDescription: {
+      fontSize: 14,
+      color: Colors.textSecondary,
+      marginBottom: 20,
+      lineHeight: 20,
+    },
+    menuItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+    },
+    menuLabel: {
+      fontSize: 16,
+      color: Colors.text,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: Colors.border,
+    },
+    themeGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 12,
+    },
+    themeOption: {
+      flex: 1,
+      minWidth: '45%',
+      aspectRatio: 1.2,
+      borderRadius: 16,
+      padding: 16,
+      justifyContent: 'space-between',
+      borderWidth: 2,
+      borderColor: 'transparent',
+      shadowColor: 'rgba(0, 0, 0, 0.08)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1,
+      shadowRadius: 8,
+      elevation: 3,
+    },
+    themeOptionSelected: {
+      borderColor: Colors.primary,
+      shadowColor: Colors.primary,
+      shadowOpacity: 0.3,
+    },
+    themeSwatch: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      shadowColor: 'rgba(0, 0, 0, 0.15)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    checkmarkContainer: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: Colors.success,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    themeLabel: {
+      fontSize: 13,
+      fontWeight: '600' as const,
+      marginTop: 8,
+    },
+    accentGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 12,
+      marginBottom: 16,
+    },
+    accentOption: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 3,
+      borderColor: 'transparent',
+      shadowColor: 'rgba(0, 0, 0, 0.15)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    accentOptionSelected: {
+      borderColor: Colors.white,
+      shadowColor: 'rgba(0, 0, 0, 0.3)',
+      shadowOpacity: 1,
+    },
+    resetButton: {
+      paddingVertical: 10,
+      alignItems: 'center',
+    },
+    resetButtonText: {
+      fontSize: 14,
+      fontWeight: '600' as const,
+      color: Colors.primary,
+    },
+  });
+}
