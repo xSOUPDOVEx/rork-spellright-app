@@ -358,11 +358,12 @@ function createStyles() {
     optionButton: {
       flex: 1,
       minWidth: '22%',
-      paddingVertical: 12,
-      paddingHorizontal: 16,
+      paddingVertical: 16,
+      paddingHorizontal: 8,
       borderRadius: 12,
       backgroundColor: Colors.backgroundSecondary,
       alignItems: 'center',
+      justifyContent: 'center',
       shadowColor: 'rgba(0, 0, 0, 0.08)',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 1,
@@ -376,6 +377,7 @@ function createStyles() {
       fontSize: 14,
       fontWeight: '600' as const,
       color: Colors.text,
+      textAlign: 'center' as const,
     },
     optionTextActive: {
       color: Colors.white,
