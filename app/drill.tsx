@@ -489,7 +489,7 @@ export default function DrillScreen() {
                 {rowIndex === 2 && <View style={styles.spacer} />}
               </View>
             ))}
-            <View style={styles.keyboardRow}>
+            <View style={styles.bottomActionsRow}>
               {(() => {
                 if (!keyAnimations['backspace']) {
                   keyAnimations['backspace'] = new Animated.Value(1);
@@ -505,35 +505,37 @@ export default function DrillScreen() {
                     <Pressable
                       onPress={handleBackspace}
                       disabled={backspaceDisabled}
+                      style={styles.actionButtonWrapper}
                     >
                       <Animated.View
                         style={[
-                          styles.key,
-                          styles.backspaceKey,
-                          backspaceDisabled && styles.keyDisabled,
+                          styles.duolingoButton,
+                          styles.backspaceButton,
+                          backspaceDisabled && styles.buttonDisabled,
                           {
                             transform: [{ scale: keyAnimations['backspace'] }],
                           },
                         ]}
                       >
-                        <Delete size={20} color={Colors.text} />
+                        <Delete size={24} color={Colors.text} strokeWidth={2.5} />
                       </Animated.View>
                     </Pressable>
                     <Pressable
                       onPress={handleSubmit}
                       disabled={submitDisabled}
+                      style={[styles.actionButtonWrapper, styles.checkButtonWrapper]}
                     >
                       <Animated.View
                         style={[
-                          styles.key,
-                          styles.submitKey,
-                          submitDisabled && styles.submitKeyDisabled,
+                          styles.duolingoButton,
+                          styles.checkButton,
+                          submitDisabled && styles.checkButtonDisabled,
                           {
                             transform: [{ scale: keyAnimations['submit'] }],
                           },
                         ]}
                       >
-                        <Text style={styles.submitKeyText}>CHECK</Text>
+                        <Text style={styles.checkButtonText}>CHECK</Text>
                       </Animated.View>
                     </Pressable>
                   </>
@@ -945,31 +947,53 @@ const styles = StyleSheet.create({
     fontWeight: '700' as const,
     color: Colors.text,
   },
-  backspaceKey: {
-    flex: 1.5,
-    maxWidth: 1000,
-    backgroundColor: Colors.backgroundSecondary,
+  bottomActionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingTop: 16,
   },
-  submitKey: {
-    flex: 3,
-    maxWidth: 1000,
+  actionButtonWrapper: {
+    flex: 1,
+  },
+  checkButtonWrapper: {
+    flex: 1.2,
+  },
+  duolingoButton: {
+    height: 60,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderBottomWidth: 4,
+  },
+  backspaceButton: {
+    backgroundColor: Colors.white,
+    borderColor: '#D0D5DD',
+    borderWidth: 2,
+    borderBottomWidth: 4,
+  },
+  checkButton: {
     backgroundColor: Colors.primary,
-    shadowColor: Colors.primary,
+    borderColor: '#B94939',
+    shadowColor: 'rgba(217, 92, 74, 0.5)',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
-    height: 56,
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  submitKeyDisabled: {
-    backgroundColor: Colors.border,
-    opacity: 0.5,
+  checkButtonDisabled: {
+    backgroundColor: '#E5E5E5',
+    borderColor: '#CCCCCC',
+    opacity: 0.6,
   },
-  submitKeyText: {
+  buttonDisabled: {
+    opacity: 0.4,
+  },
+  checkButtonText: {
     fontSize: 18,
-    fontWeight: '700' as const,
+    fontWeight: '800' as const,
     color: Colors.white,
-    letterSpacing: 0.5,
+    letterSpacing: 1,
+    textTransform: 'uppercase' as const,
   },
   loadingContainer: {
     flex: 1,
