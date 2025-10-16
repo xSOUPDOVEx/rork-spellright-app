@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { Check, Delete, Star, X } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Animated, Dimensions, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ConfettiCannon from 'react-native-confetti-cannon';
 
@@ -141,10 +141,7 @@ export default function DrillScreen() {
       }
     }
 
-    // Play pronunciation audio if voice is enabled
     if (settings.voiceEnabled && correct) {
-      // TODO: Integrate ElevenLabs TTS in Cursor
-      // await playWordAudio(currentWord.word);
       console.log('Voice feedback enabled - will play:', currentWord.word);
     }
 
@@ -173,9 +170,6 @@ export default function DrillScreen() {
       const newMastery = Math.min(10, mastery + 1);
       setMastery(newMastery);
     } else {
-      // TODO: Replace with actual Claude API call in Cursor
-      // This will be integrated with Anthropic SDK
-      // Future: const tip = await getAIFeedback(userInput, currentWord.word);
       const mockTips = [
         "Remember: I before E except after C",
         "Double letters are common in English",
@@ -253,6 +247,11 @@ export default function DrillScreen() {
             fadeOut
           />
         )}
+        <KeyboardAvoidingView 
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={0}
+        >
         <View style={styles.header}>
           <View style={styles.masteryContainer}>
             <View style={styles.masteryCircle}>
@@ -307,7 +306,12 @@ export default function DrillScreen() {
           </View>
         </View>
 
-        <View style={styles.content}>
+        <ScrollView 
+          style={styles.scrollContent}
+          contentContainerStyle={styles.scrollContentContainer}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <Animated.View style={[styles.wordContainer, { opacity: fadeAnim }]}>
             {!showFeedback && (
               <>
@@ -433,27 +437,22 @@ export default function DrillScreen() {
                       <Text style={styles.tipLabel}>💡 Tip:</Text>
                       <Text style={styles.tipText}>{tip}</Text>
                     </View>
-                    
-                    <Pressable 
-                      style={styles.tryAgainButton}
-                      onPress={handleContinue}
-                    >
-                      <Text style={styles.tryAgainText}>Continue</Text>
-                    </Pressable>
                   </>
-                )}
-                
-                {isCorrect && (
-                  <Pressable 
-                    style={styles.continueButton}
-                    onPress={handleContinue}
-                  >
-                    <Text style={styles.continueButtonText}>Continue</Text>
-                  </Pressable>
                 )}
               </View>
             )}
           </Animated.View>
+
+          {showFeedback && (
+            <View style={styles.continueButtonContainer}>
+              <Pressable 
+                style={[styles.floatingContinueButton, isCorrect ? styles.floatingContinueSuccess : styles.floatingContinuePrimary]}
+                onPress={handleContinue}
+              >
+                <Text style={styles.floatingContinueText}>Continue</Text>
+              </Pressable>
+            </View>
+          )}
 
           <View style={styles.keyboardContainer}>
             {KEYBOARD_ROWS.map((row, rowIndex) => (
@@ -542,7 +541,8 @@ export default function DrillScreen() {
               })()}
             </View>
           </View>
-        </View>
+        </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </View>
   );
@@ -634,13 +634,14 @@ const styles = StyleSheet.create({
   nodeIncorrect: {
     backgroundColor: Colors.error,
   },
-  content: {
+  scrollContent: {
     flex: 1,
+  },
+  scrollContentContainer: {
+    flexGrow: 1,
     paddingHorizontal: 24,
-    justifyContent: 'space-between',
   },
   wordContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 8,
@@ -649,6 +650,7 @@ const styles = StyleSheet.create({
   feedbackContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    paddingBottom: 24,
   },
   feedbackBadge: {
     width: 110,
@@ -876,6 +878,35 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     lineHeight: 20,
   },
+  continueButtonContainer: {
+    paddingHorizontal: 0,
+    paddingVertical: 16,
+    paddingBottom: 24,
+  },
+  floatingContinueButton: {
+    borderRadius: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: 'rgba(0, 0, 0, 0.3)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  floatingContinueSuccess: {
+    backgroundColor: Colors.success,
+  },
+  floatingContinuePrimary: {
+    backgroundColor: Colors.primary,
+  },
+  floatingContinueText: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: Colors.white,
+    letterSpacing: 0.5,
+  },
   keyboardContainer: {
     paddingBottom: 8,
     gap: 8,
@@ -981,39 +1012,5 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: Colors.primary,
     borderRadius: 2,
-  },
-  tryAgainButton: {
-    backgroundColor: Colors.primary,
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 48,
-    marginTop: 20,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  tryAgainText: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-    color: Colors.white,
-  },
-  continueButton: {
-    backgroundColor: Colors.success,
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 48,
-    marginTop: 24,
-    shadowColor: Colors.success,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  continueButtonText: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-    color: Colors.white,
   },
 });
