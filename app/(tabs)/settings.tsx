@@ -16,7 +16,7 @@ export default function SettingsScreen() {
 
   const difficulties = [
     { value: 'easy' as const, label: 'Easy' },
-    { value: 'medium' as const, label: 'Medium' },
+    { value: 'medium' as const, label: 'Med' },
     { value: 'hard' as const, label: 'Hard' },
     { value: 'mixed' as const, label: 'Mixed' },
   ];
@@ -167,6 +167,8 @@ export default function SettingsScreen() {
                       styles.optionText,
                       settings.difficulty === diff.value && styles.optionTextActive,
                     ]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
                   >
                     {diff.label}
                   </Text>
@@ -193,6 +195,7 @@ export default function SettingsScreen() {
                       styles.optionText,
                       settings.dailyGoal === goal && styles.optionTextActive,
                     ]}
+                    numberOfLines={1}
                   >
                     {goal}
                   </Text>
@@ -359,7 +362,7 @@ function createStyles() {
       flex: 1,
       minWidth: '22%',
       paddingVertical: 16,
-      paddingHorizontal: 8,
+      paddingHorizontal: 4,
       borderRadius: 12,
       backgroundColor: Colors.backgroundSecondary,
       alignItems: 'center',
@@ -378,6 +381,7 @@ function createStyles() {
       fontWeight: '600' as const,
       color: Colors.text,
       textAlign: 'center' as const,
+      numberOfLines: 1,
     },
     optionTextActive: {
       color: Colors.white,
@@ -464,11 +468,11 @@ function createStyles() {
       alignItems: 'center',
     },
     themeLabel: {
-      fontSize: 11,
+      fontSize: 10,
       fontWeight: '600' as const,
       marginTop: 8,
       textAlign: 'center' as const,
-      lineHeight: 14,
+      lineHeight: 13,
     },
     accentGrid: {
       flexDirection: 'row',

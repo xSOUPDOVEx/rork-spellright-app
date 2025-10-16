@@ -133,9 +133,9 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   scoreCircle: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
@@ -147,10 +147,11 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   scoreText: {
-    fontSize: 48,
+    fontSize: 52,
     fontWeight: '700' as const,
     color: Colors.white,
     textAlign: 'center' as const,
+    includeFontPadding: false,
   },
   title: {
     fontSize: 28,
