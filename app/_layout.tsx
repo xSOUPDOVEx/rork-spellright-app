@@ -15,6 +15,7 @@ function RootLayoutNav() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="lesson-preview" options={{ headerShown: false }} />
       <Stack.Screen name="drill" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="results" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="subscription" options={{ title: 'Go Premium', presentation: 'modal' }} />

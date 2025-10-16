@@ -81,7 +81,7 @@ export default function HomeScreen() {
       }),
     ]).start();
 
-    router.push('/drill' as any);
+    router.push(`/lesson-preview?lessonId=${node.id}` as any);
   };
 
   const handleUpgrade = () => {
