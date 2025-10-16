@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { Check, Delete, Star, X } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Animated, Dimensions, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ConfettiCannon from 'react-native-confetti-cannon';
 
@@ -83,7 +83,7 @@ export default function DrillScreen() {
     );
     pulse.start();
     return () => pulse.stop();
-  }, [currentWordIndex]);
+  }, [currentWordIndex, pulseAnim]);
 
   const currentWord = words[currentWordIndex];
 
@@ -95,12 +95,12 @@ export default function DrillScreen() {
     Animated.sequence([
       Animated.timing(keyAnimations[key], {
         toValue: 0.94,
-        duration: 30,
+        duration: 0,
         useNativeDriver: true,
       }),
       Animated.timing(keyAnimations[key], {
         toValue: 1,
-        duration: 50,
+        duration: 30,
         useNativeDriver: true,
       }),
     ]).start();
@@ -108,19 +108,19 @@ export default function DrillScreen() {
 
   const handleKeyPress = (key: string) => {
     if (showFeedback) return;
-    setUserInput(prev => prev + key.toLowerCase());
     animateKeyPress(key);
+    setUserInput(prev => prev + key.toLowerCase());
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     }
   };
 
   const handleBackspace = () => {
     if (showFeedback) return;
-    setUserInput(prev => prev.slice(0, -1));
     animateKeyPress('backspace');
+    setUserInput(prev => prev.slice(0, -1));
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     }
   };
 
@@ -466,7 +466,7 @@ export default function DrillScreen() {
                   const isDisabled = showFeedback || userInput.length === currentWord.word.length;
                   
                   return (
-                    <TouchableWithoutFeedback
+                    <Pressable
                       key={key}
                       onPress={() => handleKeyPress(key)}
                       disabled={isDisabled}
@@ -482,7 +482,7 @@ export default function DrillScreen() {
                       >
                         <Text style={styles.keyText}>{key}</Text>
                       </Animated.View>
-                    </TouchableWithoutFeedback>
+                    </Pressable>
                   );
                 })}
                 {rowIndex === 1 && <View style={styles.spacer} />}
@@ -502,7 +502,7 @@ export default function DrillScreen() {
                 
                 return (
                   <>
-                    <TouchableWithoutFeedback
+                    <Pressable
                       onPress={handleBackspace}
                       disabled={backspaceDisabled}
                     >
@@ -518,8 +518,8 @@ export default function DrillScreen() {
                       >
                         <Delete size={20} color={Colors.text} />
                       </Animated.View>
-                    </TouchableWithoutFeedback>
-                    <TouchableWithoutFeedback
+                    </Pressable>
+                    <Pressable
                       onPress={handleSubmit}
                       disabled={submitDisabled}
                     >
@@ -535,7 +535,7 @@ export default function DrillScreen() {
                       >
                         <Text style={styles.submitKeyText}>CHECK</Text>
                       </Animated.View>
-                    </TouchableWithoutFeedback>
+                    </Pressable>
                   </>
                 );
               })()}
