@@ -400,7 +400,12 @@ export default function DrillScreen() {
                     </View>
                     
                     <View style={styles.letterComparisonContainer}>
-                      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.letterComparisonScroll}>
+                      <ScrollView 
+                        horizontal 
+                        showsHorizontalScrollIndicator={false} 
+                        contentContainerStyle={styles.letterComparisonScroll}
+                        style={{ flexGrow: 0 }}
+                      >
                         {currentWord.word.split('').map((letter, index) => {
                           const userLetter = userInput[index]?.toLowerCase();
                           const isCorrectLetter = userLetter === letter.toLowerCase();
@@ -790,10 +795,14 @@ const styles = StyleSheet.create({
   },
   letterComparisonContainer: {
     marginBottom: 16,
+    width: '100%',
+    alignItems: 'center',
   },
   letterComparisonScroll: {
     paddingHorizontal: 24,
+    flexDirection: 'row',
     gap: 6,
+    alignItems: 'center',
   },
   letterComparisonItem: {
     alignItems: 'center',
