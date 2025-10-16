@@ -2,9 +2,9 @@ import Card from '@/components/Card';
 import Colors from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 import { mockProgressData } from '@/mocks/words';
-import { BarChart3, TrendingUp, Target } from 'lucide-react-native';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { BarChart3, TrendingUp, Target, Star } from 'lucide-react-native';
+import React, { useEffect, useRef } from 'react';
+import { ScrollView, StyleSheet, Text, View, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface CategoryData {
@@ -14,11 +14,86 @@ interface CategoryData {
   size: number;
 }
 
+interface PatternMastery {
+  name: string;
+  mastery: number;
+  total: number;
+}
+
+const MasteryCircle = ({ pattern, index }: { pattern: PatternMastery; index: number }) => {
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const delay = index * 100;
+    
+    Animated.sequence([
+      Animated.delay(delay),
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 50,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 400,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+  }, [index, opacityAnim, scaleAnim]);
+
+  const progressPercentage = Math.round((pattern.mastery / pattern.total) * 100);
+  const circumference = 2 * Math.PI * 34;
+  const strokeDashoffset = circumference - (circumference * progressPercentage) / 100;
+
+  return (
+    <Animated.View style={[styles.masteryCircleContainer, { transform: [{ scale: scaleAnim }], opacity: opacityAnim }]}>
+      <View style={styles.circleWrapper}>
+        <View style={styles.circleBackground} />
+        <View style={styles.circleProgressContainer}>
+          <View style={styles.circleProgressRing}>
+            <View
+              style={[
+                styles.circleProgressSegment,
+                {
+                  width: 68,
+                  height: 68 * (progressPercentage / 100),
+                  backgroundColor: Colors.success,
+                  borderTopLeftRadius: 34,
+                  borderTopRightRadius: 34,
+                },
+              ]}
+            />
+          </View>
+        </View>
+        <View style={styles.circleInner}>
+          <Star size={20} color={Colors.success} fill={Colors.success} />
+        </View>
+      </View>
+      <Text style={styles.masteryCount}>{pattern.mastery}/{pattern.total}</Text>
+      <Text style={styles.masteryName}>{pattern.name}</Text>
+    </Animated.View>
+  );
+};
+
 export default function ProgressScreen() {
   const { stats } = useApp();
 
   const maxXP = Math.max(...mockProgressData.map(d => d.xp));
   const maxAccuracy = 100;
+
+  const patternMasteries: PatternMastery[] = [
+    { name: 'Silent E', mastery: 8, total: 10 },
+    { name: 'Double Consonants', mastery: 6, total: 10 },
+    { name: 'I Before E', mastery: 10, total: 10 },
+    { name: 'Hard/Soft C', mastery: 7, total: 10 },
+    { name: 'Hard/Soft G', mastery: 5, total: 10 },
+    { name: '-tion/-sion', mastery: 9, total: 10 },
+  ];
 
   const categories: CategoryData[] = [
     { name: 'DESIGN', lessons: 36, color: Colors.courses.blue, size: 180 },
@@ -39,6 +114,32 @@ export default function ProgressScreen() {
       </SafeAreaView>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <Card style={styles.masteryInfoCard}>
+          <View style={styles.masteryInfoContent}>
+            <View style={styles.masteryInfoIcon}>
+              <Star size={24} color={Colors.white} fill={Colors.white} />
+            </View>
+            <View style={styles.masteryInfoText}>
+              <Text style={styles.masteryInfoTitle}>Mastery shows you how confident you are with each pattern.</Text>
+              <Text style={styles.masteryInfoSubtitle}>It grows over time.</Text>
+            </View>
+            <View style={styles.masteryInfoBadge}>
+              <Text style={styles.masteryInfoBadgeText}>10/10</Text>
+            </View>
+          </View>
+        </Card>
+
+        <View style={styles.masterySection}>
+          <View style={styles.masteryGrid}>
+            {patternMasteries.map((pattern, index) => (
+              <MasteryCircle key={pattern.name} pattern={pattern} index={index} />
+            ))}
+          </View>
+          <View style={styles.lotusDecoration}>
+            <Text style={styles.lotusEmoji}>🪷</Text>
+          </View>
+        </View>
+
         <View style={styles.statsGrid}>
           <Card style={styles.statCard}>
             <View style={styles.statHeader}>
@@ -189,6 +290,133 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  masteryInfoCard: {
+    marginHorizontal: 24,
+    marginTop: 24,
+    marginBottom: 20,
+    backgroundColor: Colors.success,
+  },
+  masteryInfoContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  masteryInfoIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  masteryInfoText: {
+    flex: 1,
+  },
+  masteryInfoTitle: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: Colors.white,
+    marginBottom: 2,
+  },
+  masteryInfoSubtitle: {
+    fontSize: 12,
+    color: Colors.white,
+    opacity: 0.9,
+  },
+  masteryInfoBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  masteryInfoBadgeText: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+    color: Colors.white,
+  },
+  masterySection: {
+    marginHorizontal: 24,
+    marginBottom: 24,
+    position: 'relative',
+  },
+  masteryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 20,
+  },
+  masteryCircleContainer: {
+    width: '30%',
+    alignItems: 'center',
+    gap: 8,
+  },
+  circleWrapper: {
+    width: 80,
+    height: 80,
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  circleBackground: {
+    position: 'absolute',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: Colors.backgroundSecondary,
+  },
+  circleProgressContainer: {
+    position: 'absolute',
+    width: 80,
+    height: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  circleProgressRing: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    overflow: 'hidden',
+    transform: [{ rotate: '-90deg' }],
+  },
+  circleProgressSegment: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+  circleInner: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: Colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  masteryCount: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+    color: Colors.text,
+  },
+  masteryName: {
+    fontSize: 11,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  lotusDecoration: {
+    position: 'absolute',
+    bottom: -10,
+    right: 10,
+    opacity: 0.1,
+    zIndex: -1,
+  },
+  lotusEmoji: {
+    fontSize: 80,
   },
   statsGrid: {
     flexDirection: 'row',
