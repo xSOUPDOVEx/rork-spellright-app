@@ -1,6 +1,7 @@
 import createContextHook from '@nkzw/create-context-hook';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { updateTheme, type ThemeType, type AccentColor } from '@/constants/colors';
 
 export type SkillLevel = 'beginner' | 'intermediate' | 'advanced';
 
@@ -10,6 +11,8 @@ export type UserSettings = {
   dailyGoal: number;
   isPremium: boolean;
   initialLevel: SkillLevel;
+  theme: ThemeType;
+  accentColor: AccentColor | null;
 };
 
 export type UserStats = {
@@ -32,6 +35,7 @@ export type AppState = {
   updateStreak: () => void;
   incrementWordsLearned: () => void;
   updateAccuracy: (newAccuracy: number) => void;
+  updateThemeSettings: (theme: ThemeType, accentColor?: AccentColor | null) => void;
 };
 
 const STORAGE_KEYS = {
@@ -40,6 +44,7 @@ const STORAGE_KEYS = {
   SETTINGS: '@spellright_settings',
   STATS: '@spellright_stats',
   LAST_PRACTICE: '@spellright_last_practice',
+  THEME: '@spellright_theme',
 };
 
 const defaultSettings: UserSettings = {
@@ -48,6 +53,8 @@ const defaultSettings: UserSettings = {
   dailyGoal: 50,
   isPremium: false,
   initialLevel: 'beginner',
+  theme: 'warmParchment',
+  accentColor: null,
 };
 
 const defaultStats: UserStats = {
@@ -80,7 +87,11 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
       if (onboarded) setIsOnboarded(true);
       if (name) setUserName(name);
-      if (settingsData) setSettings(JSON.parse(settingsData));
+      if (settingsData) {
+        const parsed = JSON.parse(settingsData);
+        setSettings(parsed);
+        updateTheme(parsed.theme || 'warmParchment', parsed.accentColor || null);
+      }
       if (statsData) setStats(JSON.parse(statsData));
     } catch (error) {
       console.error('Error loading data:', error);
@@ -175,6 +186,17 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, [stats]);
 
+  const updateThemeSettings = useCallback(async (theme: ThemeType, accentColor?: AccentColor | null) => {
+    try {
+      const updated = { ...settings, theme, accentColor: accentColor || null };
+      await AsyncStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
+      setSettings(updated);
+      updateTheme(theme, accentColor || null);
+    } catch (error) {
+      console.error('Error updating theme:', error);
+    }
+  }, [settings]);
+
   return useMemo(() => ({
     isOnboarded,
     userName,
@@ -186,5 +208,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
     updateStreak,
     incrementWordsLearned,
     updateAccuracy,
-  }), [isOnboarded, userName, settings, stats, setOnboarded, updateSettings, addXP, updateStreak, incrementWordsLearned, updateAccuracy]);
+    updateThemeSettings,
+  }), [isOnboarded, userName, settings, stats, setOnboarded, updateSettings, addXP, updateStreak, incrementWordsLearned, updateAccuracy, updateThemeSettings]);
 });

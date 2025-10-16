@@ -1,16 +1,17 @@
 import Button from '@/components/Button';
 import Card from '@/components/Card';
-import Colors from '@/constants/colors';
+import Colors, { THEMES, ACCENT_COLORS, type ThemeType, type AccentColor } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 import { useRouter } from 'expo-router';
-import { ChevronRight, Crown, Volume2, VolumeX } from 'lucide-react-native';
-import React from 'react';
+import { ChevronRight, Crown, Volume2, VolumeX, Check } from 'lucide-react-native';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SettingsScreen() {
-  const { userName, settings, updateSettings } = useApp();
+  const { userName, settings, updateSettings, updateThemeSettings } = useApp();
   const router = useRouter();
+  const [forceUpdate, setForceUpdate] = useState<number>(0);
 
   const difficulties = [
     { value: 'easy' as const, label: 'Easy' },
@@ -52,6 +53,80 @@ export default function SettingsScreen() {
             />
           )}
         </Card>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Appearance</Text>
+
+          <Card>
+            <Text style={styles.cardTitle}>Color Theme</Text>
+            <View style={styles.themeGrid}>
+              {(Object.keys(THEMES) as ThemeType[]).map((themeKey) => {
+                const theme = THEMES[themeKey];
+                const isSelected = settings.theme === themeKey;
+                return (
+                  <TouchableOpacity
+                    key={themeKey}
+                    style={[
+                      styles.themeOption,
+                      { backgroundColor: theme.background },
+                      isSelected && styles.themeOptionSelected,
+                    ]}
+                    onPress={() => {
+                      updateThemeSettings(themeKey, settings.accentColor);
+                      setForceUpdate(prev => prev + 1);
+                    }}
+                    testID={`theme-${themeKey}`}
+                  >
+                    <View style={[styles.themeSwatch, { backgroundColor: theme.primary }]} />
+                    {isSelected && (
+                      <View style={styles.checkmarkContainer}>
+                        <Check size={16} color={Colors.white} strokeWidth={3} />
+                      </View>
+                    )}
+                    <Text style={[styles.themeLabel, { color: Colors.text }]}>{theme.name}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </Card>
+
+          <Card style={styles.cardMargin}>
+            <Text style={styles.cardTitle}>Accent Color</Text>
+            <View style={styles.accentGrid}>
+              {ACCENT_COLORS.map((accent) => {
+                const isSelected = settings.accentColor === accent.color;
+                return (
+                  <TouchableOpacity
+                    key={accent.color}
+                    style={[
+                      styles.accentOption,
+                      { backgroundColor: accent.color },
+                      isSelected && styles.accentOptionSelected,
+                    ]}
+                    onPress={() => {
+                      updateThemeSettings(settings.theme, accent.color);
+                      setForceUpdate(prev => prev + 1);
+                    }}
+                    testID={`accent-${accent.name}`}
+                  >
+                    {isSelected && (
+                      <Check size={20} color={Colors.white} strokeWidth={3} />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <TouchableOpacity
+              style={styles.resetButton}
+              onPress={() => {
+                updateThemeSettings(settings.theme, null);
+                setForceUpdate(prev => prev + 1);
+              }}
+            >
+              <Text style={styles.resetButtonText}>Reset to Theme Default</Text>
+            </TouchableOpacity>
+          </Card>
+        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Practice Settings</Text>
@@ -338,5 +413,90 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: Colors.border,
+  },
+  themeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  themeOption: {
+    flex: 1,
+    minWidth: '45%',
+    aspectRatio: 1.2,
+    borderRadius: 16,
+    padding: 16,
+    justifyContent: 'space-between',
+    borderWidth: 2,
+    borderColor: 'transparent',
+    shadowColor: 'rgba(0, 0, 0, 0.08)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  themeOptionSelected: {
+    borderColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.3,
+  },
+  themeSwatch: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    shadowColor: 'rgba(0, 0, 0, 0.15)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  checkmarkContainer: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.success,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  themeLabel: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    marginTop: 8,
+  },
+  accentGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 16,
+  },
+  accentOption: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: 'transparent',
+    shadowColor: 'rgba(0, 0, 0, 0.15)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  accentOptionSelected: {
+    borderColor: Colors.white,
+    shadowColor: 'rgba(0, 0, 0, 0.3)',
+    shadowOpacity: 1,
+  },
+  resetButton: {
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  resetButtonText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: Colors.primary,
   },
 });
