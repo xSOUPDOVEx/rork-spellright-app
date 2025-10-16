@@ -83,9 +83,9 @@ export default function ResultsScreen() {
                     ]}
                   >
                     {result.correct ? (
-                      <Check size={20} color={Colors.white} />
+                      <Check size={24} color={Colors.white} />
                     ) : (
-                      <X size={20} color={Colors.white} />
+                      <X size={24} color={Colors.white} />
                     )}
                   </View>
                 </View>
@@ -133,9 +133,9 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   scoreCircle: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
@@ -145,14 +145,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 12,
     elevation: 4,
-    paddingHorizontal: 8,
   },
   scoreText: {
-    fontSize: 48,
+    fontSize: 56,
     fontWeight: '700' as const,
     color: Colors.white,
     textAlign: 'center' as const,
     includeFontPadding: false,
+    numberOfLines: 1,
   },
   title: {
     fontSize: 28,
@@ -215,9 +215,9 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   resultBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
