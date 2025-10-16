@@ -4,9 +4,9 @@ import { useApp } from '@/contexts/AppContext';
 import { mockWords, Word } from '@/mocks/words';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Check, Delete, X } from 'lucide-react-native';
+import { Check, Delete, Star, X } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Platform, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Animated, Dimensions, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ConfettiCannon from 'react-native-confetti-cannon';
 
@@ -51,7 +51,12 @@ export default function DrillScreen() {
   const [words, setWords] = useState<Word[]>([]);
   const [tip, setTip] = useState<string>('');
   const [showConfetti, setShowConfetti] = useState(false);
+  const [mastery, setMastery] = useState<number>(7);
   const fadeAnim = useState(new Animated.Value(1))[0];
+  const xpFloatAnim = useState(new Animated.Value(0))[0];
+  const xpOpacityAnim = useState(new Animated.Value(0))[0];
+  const feedbackScaleAnim = useState(new Animated.Value(0))[0];
+  const pulseAnim = useState(new Animated.Value(1))[0];
   const keyAnimations = useRef<{ [key: string]: Animated.Value }>({}).current;
 
   useEffect(() => {
@@ -60,6 +65,25 @@ export default function DrillScreen() {
       : mockWords.filter(w => w.difficulty === settings.difficulty).slice(0, 5);
     setWords(filteredWords);
   }, [settings.difficulty]);
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.15,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [currentWordIndex]);
 
   const currentWord = words[currentWordIndex];
 
@@ -129,6 +153,25 @@ export default function DrillScreen() {
       incrementWordsLearned();
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
+      
+      xpOpacityAnim.setValue(1);
+      xpFloatAnim.setValue(0);
+      Animated.parallel([
+        Animated.timing(xpFloatAnim, {
+          toValue: -50,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(xpOpacityAnim, {
+          toValue: 0,
+          delay: 500,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]).start();
+      
+      const newMastery = Math.min(10, mastery + 1);
+      setMastery(newMastery);
     } else {
       // TODO: Replace with actual Claude API call in Cursor
       // This will be integrated with Anthropic SDK
@@ -145,6 +188,14 @@ export default function DrillScreen() {
       setTip(randomTip);
     }
 
+    feedbackScaleAnim.setValue(0);
+    Animated.spring(feedbackScaleAnim, {
+      toValue: 1,
+      tension: 50,
+      friction: 5,
+      useNativeDriver: true,
+    }).start();
+
     Animated.sequence([
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -157,21 +208,21 @@ export default function DrillScreen() {
         useNativeDriver: true,
       }),
     ]).start();
+  };
 
-    setTimeout(() => {
-      if (currentWordIndex < words.length - 1) {
-        setCurrentWordIndex(currentWordIndex + 1);
-        setUserInput('');
-        setShowFeedback(false);
-      } else {
-        updateStreak();
-        const finalResults = results.concat([{ word: currentWord, correct }]);
-        router.replace({
-          pathname: '/results' as any,
-          params: { resultsData: JSON.stringify(finalResults) },
-        });
-      }
-    }, 1500);
+  const handleContinue = () => {
+    if (currentWordIndex < words.length - 1) {
+      setCurrentWordIndex(currentWordIndex + 1);
+      setUserInput('');
+      setShowFeedback(false);
+    } else {
+      updateStreak();
+      const finalResults = results.concat([{ word: currentWord, correct: isCorrect }]);
+      router.replace({
+        pathname: '/results' as any,
+        params: { resultsData: JSON.stringify(finalResults) },
+      });
+    }
   };
 
   if (!currentWord) {
@@ -203,17 +254,57 @@ export default function DrillScreen() {
           />
         )}
         <View style={styles.header}>
-          <View style={styles.progressBar}>
-            <View
-              style={[
-                styles.progressFill,
-                { width: `${((currentWordIndex + 1) / words.length) * 100}%` },
-              ]}
-            />
+          <View style={styles.masteryContainer}>
+            <View style={styles.masteryCircle}>
+              <Star size={16} color={Colors.warning} fill={Colors.warning} />
+              <Text style={styles.masteryText}>{mastery}/10</Text>
+            </View>
           </View>
-          <Text style={styles.progressText}>
-            {currentWordIndex + 1} / {words.length}
-          </Text>
+          
+          <View style={styles.nodeProgressContainer}>
+            <Text style={styles.nodeProgressLabel}>Word {currentWordIndex + 1} of {words.length}</Text>
+            <View style={styles.nodesRow}>
+              {words.map((_, index) => {
+                const result = results[index];
+                const isCurrent = index === currentWordIndex;
+                const isCompleted = index < currentWordIndex || (index === currentWordIndex && showFeedback);
+                
+                return (
+                  <View key={index} style={styles.nodeWrapper}>
+                    {isCurrent && !showFeedback && (
+                      <Animated.View 
+                        style={[
+                          styles.pulseRing,
+                          {
+                            transform: [{ scale: pulseAnim }],
+                            opacity: pulseAnim.interpolate({
+                              inputRange: [1, 1.15],
+                              outputRange: [0.6, 0],
+                            }),
+                          },
+                        ]} 
+                      />
+                    )}
+                    <View
+                      style={[
+                        styles.node,
+                        isCompleted && result?.correct && styles.nodeCorrect,
+                        isCompleted && !result?.correct && styles.nodeIncorrect,
+                        isCurrent && !showFeedback && styles.nodeCurrent,
+                      ]}
+                    >
+                      {isCompleted && result?.correct && (
+                        <Check size={12} color={Colors.white} strokeWidth={3} />
+                      )}
+                      {isCompleted && !result?.correct && (
+                        <X size={12} color={Colors.white} strokeWidth={3} />
+                      )}
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
         </View>
 
         <View style={styles.content}>
@@ -252,32 +343,108 @@ export default function DrillScreen() {
 
             {showFeedback && (
               <View style={styles.feedbackContainer}>
-                <View style={[styles.feedbackBadge, isCorrect ? styles.correctBadge : styles.incorrectBadge]}>
+                <Animated.View 
+                  style={[
+                    styles.feedbackBadge, 
+                    isCorrect ? styles.correctBadge : styles.incorrectBadge,
+                    {
+                      transform: [{ scale: feedbackScaleAnim }],
+                    },
+                  ]}
+                >
                   {isCorrect ? (
-                    <Check size={48} color={Colors.white} />
+                    <Check size={56} color={Colors.white} strokeWidth={3} />
                   ) : (
-                    <X size={48} color={Colors.white} />
+                    <X size={56} color={Colors.white} strokeWidth={3} />
                   )}
-                </View>
+                </Animated.View>
+                
                 <Text style={[styles.feedbackText, isCorrect ? styles.correctText : styles.incorrectText]}>
-                  {isCorrect ? 'Correct!' : 'Not quite!'}
+                  {isCorrect ? 'Perfect!' : 'Not quite!'}
                 </Text>
+                
                 {isCorrect && (
-                  <View style={styles.xpBadge}>
+                  <Animated.View 
+                    style={[
+                      styles.xpBadge,
+                      {
+                        transform: [{ translateY: xpFloatAnim }],
+                        opacity: xpOpacityAnim,
+                      },
+                    ]}
+                  >
                     <Text style={styles.xpText}>+10 XP</Text>
-                  </View>
+                  </Animated.View>
                 )}
+                
                 {!isCorrect && (
                   <>
-                    <View style={styles.correctAnswer}>
-                      <Text style={styles.correctAnswerLabel}>Correct spelling:</Text>
-                      <Text style={styles.correctAnswerText}>{currentWord.word}</Text>
+                    <View style={styles.comparisonContainer}>
+                      <View style={styles.comparisonColumn}>
+                        <Text style={styles.comparisonLabel}>Your answer:</Text>
+                        <View style={styles.comparisonBox}>
+                          <Text style={styles.incorrectAnswerText}>{userInput}</Text>
+                        </View>
+                      </View>
+                      
+                      <View style={styles.comparisonArrow}>
+                        <Text style={styles.arrowText}>→</Text>
+                      </View>
+                      
+                      <View style={styles.comparisonColumn}>
+                        <Text style={styles.comparisonLabel}>Correct:</Text>
+                        <View style={[styles.comparisonBox, styles.correctComparisonBox]}>
+                          <Text style={styles.correctAnswerText}>{currentWord.word}</Text>
+                        </View>
+                      </View>
                     </View>
+                    
+                    <View style={styles.letterComparisonContainer}>
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.letterComparisonScroll}>
+                        {currentWord.word.split('').map((letter, index) => {
+                          const userLetter = userInput[index]?.toLowerCase();
+                          const isCorrectLetter = userLetter === letter.toLowerCase();
+                          
+                          return (
+                            <View key={index} style={styles.letterComparisonItem}>
+                              <View style={[
+                                styles.letterComparisonBox,
+                                isCorrectLetter ? styles.letterCorrectBox : styles.letterIncorrectBox,
+                              ]}>
+                                <Text style={[
+                                  styles.letterComparisonText,
+                                  isCorrectLetter ? styles.letterCorrectText : styles.letterIncorrectText,
+                                ]}>
+                                  {letter.toUpperCase()}
+                                </Text>
+                              </View>
+                            </View>
+                          );
+                        })}
+                      </ScrollView>
+                    </View>
+                    
                     <View style={styles.tipContainer}>
                       <Text style={styles.tipLabel}>💡 Tip:</Text>
                       <Text style={styles.tipText}>{tip}</Text>
                     </View>
+                    
+                    <Pressable 
+                      style={styles.tryAgainButton}
+                      onPress={handleContinue}
+                    >
+                      <Text style={styles.tryAgainText}>Continue</Text>
+                    </Pressable>
                   </>
+                )}
+                
+                {isCorrect && (
+                  <Pressable 
+                    style={styles.continueButton}
+                    onPress={handleContinue}
+                  >
+                    <Text style={styles.continueButtonText}>Continue</Text>
+                  </Pressable>
                 )}
               </View>
             )}
@@ -389,22 +556,78 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 16,
   },
-  progressBar: {
-    height: 8,
-    backgroundColor: Colors.border,
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginBottom: 8,
+  masteryContainer: {
+    position: 'absolute' as const,
+    top: 0,
+    right: 24,
+    zIndex: 10,
   },
-  progressFill: {
-    height: '100%',
-    backgroundColor: Colors.primary,
+  masteryCircle: {
+    backgroundColor: Colors.white,
+    borderRadius: 30,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: Colors.warning,
   },
-  progressText: {
+  masteryText: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+    color: Colors.text,
+  },
+  nodeProgressContainer: {
+    alignItems: 'center',
+  },
+  nodeProgressLabel: {
     fontSize: 14,
     color: Colors.textSecondary,
-    textAlign: 'center',
     fontWeight: '600' as const,
+    marginBottom: 12,
+  },
+  nodesRow: {
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+  },
+  nodeWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative' as const,
+  },
+  pulseRing: {
+    position: 'absolute' as const,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  node: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  nodeCurrent: {
+    backgroundColor: Colors.white,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  nodeCorrect: {
+    backgroundColor: Colors.success,
+  },
+  nodeIncorrect: {
+    backgroundColor: Colors.error,
   },
   content: {
     flex: 1,
@@ -423,17 +646,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   feedbackBadge: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
-    shadowColor: 'rgba(0, 0, 0, 0.15)',
-    shadowOffset: { width: 0, height: 4 },
+    marginBottom: 24,
+    shadowColor: 'rgba(0, 0, 0, 0.2)',
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 1,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowRadius: 16,
+    elevation: 8,
   },
   correctBadge: {
     backgroundColor: Colors.success,
@@ -506,9 +729,9 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   feedbackText: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: '700' as const,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   correctText: {
     color: Colors.success,
@@ -516,45 +739,117 @@ const styles = StyleSheet.create({
   incorrectText: {
     color: Colors.error,
   },
-  correctAnswer: {
+  comparisonContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    justifyContent: 'center',
+    gap: 12,
+    marginTop: 12,
+    marginBottom: 16,
   },
-  correctAnswerLabel: {
-    fontSize: 16,
+  comparisonColumn: {
+    alignItems: 'center',
+  },
+  comparisonLabel: {
+    fontSize: 12,
     color: Colors.textSecondary,
-    marginBottom: 8,
+    marginBottom: 6,
+    fontWeight: '600' as const,
+    textTransform: 'uppercase' as const,
+  },
+  comparisonBox: {
+    backgroundColor: Colors.backgroundSecondary,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    minWidth: 100,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.error,
+  },
+  correctComparisonBox: {
+    backgroundColor: Colors.success + '20',
+    borderColor: Colors.success,
+  },
+  incorrectAnswerText: {
+    fontSize: 22,
+    fontWeight: '700' as const,
+    color: Colors.error,
   },
   correctAnswerText: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: Colors.success,
+  },
+  comparisonArrow: {
+    marginHorizontal: 4,
+  },
+  arrowText: {
+    fontSize: 24,
+    color: Colors.textSecondary,
+  },
+  letterComparisonContainer: {
+    marginBottom: 16,
+  },
+  letterComparisonScroll: {
+    paddingHorizontal: 24,
+    gap: 6,
+  },
+  letterComparisonItem: {
+    alignItems: 'center',
+  },
+  letterComparisonBox: {
+    width: 40,
+    height: 48,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+  },
+  letterCorrectBox: {
+    backgroundColor: Colors.success + '20',
+    borderColor: Colors.success,
+  },
+  letterIncorrectBox: {
+    backgroundColor: Colors.error + '20',
+    borderColor: Colors.error,
+  },
+  letterComparisonText: {
+    fontSize: 20,
+    fontWeight: '700' as const,
+  },
+  letterCorrectText: {
+    color: Colors.success,
+  },
+  letterIncorrectText: {
+    color: Colors.error,
   },
   xpBadge: {
+    position: 'absolute' as const,
+    top: -30,
     backgroundColor: Colors.success,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    marginTop: 4,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
     shadowColor: Colors.success,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 6,
   },
   xpText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700' as const,
     color: Colors.white,
   },
   tipContainer: {
-    backgroundColor: Colors.backgroundSecondary,
+    backgroundColor: Colors.white,
     borderRadius: 16,
     padding: 16,
     marginTop: 12,
     maxWidth: '90%',
-    borderWidth: 1,
-    borderColor: Colors.border,
+    borderWidth: 2,
+    borderColor: Colors.warning,
     shadowColor: 'rgba(0, 0, 0, 0.08)',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
@@ -677,5 +972,39 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: Colors.primary,
     borderRadius: 2,
+  },
+  tryAgainButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 48,
+    marginTop: 20,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  tryAgainText: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: Colors.white,
+  },
+  continueButton: {
+    backgroundColor: Colors.success,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 48,
+    marginTop: 24,
+    shadowColor: Colors.success,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  continueButtonText: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: Colors.white,
   },
 });
