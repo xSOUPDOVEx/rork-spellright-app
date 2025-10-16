@@ -92,18 +92,12 @@ export default function DrillScreen() {
       keyAnimations[key] = new Animated.Value(1);
     }
     
-    Animated.sequence([
-      Animated.timing(keyAnimations[key], {
-        toValue: 0.94,
-        duration: 0,
-        useNativeDriver: true,
-      }),
-      Animated.timing(keyAnimations[key], {
-        toValue: 1,
-        duration: 30,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    keyAnimations[key].setValue(0.94);
+    Animated.timing(keyAnimations[key], {
+      toValue: 1,
+      duration: 50,
+      useNativeDriver: true,
+    }).start();
   };
 
   const handleKeyPress = (key: string) => {
