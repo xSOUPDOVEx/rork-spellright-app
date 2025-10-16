@@ -147,12 +147,11 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   scoreText: {
-    fontSize: 48,
+    fontSize: 44,
     fontWeight: '700' as const,
     color: Colors.white,
-    lineHeight: 48,
+    lineHeight: 44,
     textAlign: 'center' as const,
-    textAlignVertical: 'center' as const,
   },
   title: {
     fontSize: 28,

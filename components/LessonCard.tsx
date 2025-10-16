@@ -135,18 +135,20 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700' as const,
     color: Colors.white,
     marginBottom: 4,
     textShadowColor: 'rgba(0, 0, 0, 0.1)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
+    lineHeight: 24,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.white,
     opacity: 0.9,
+    lineHeight: 18,
   },
   progressContainer: {
     marginTop: 12,

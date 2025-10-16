@@ -584,7 +584,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.warning,
   },
   masteryText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700' as const,
     color: Colors.text,
   },

@@ -86,8 +86,8 @@ const MasteryCircle = ({ pattern, index }: { pattern: PatternMastery; index: num
           <Star size={20} color={Colors.success} fill={Colors.success} />
         </View>
       </View>
-      <Text style={styles.masteryCount}>{pattern.mastery}/{pattern.total}</Text>
-      <Text style={styles.masteryName}>{pattern.name}</Text>
+      <Text style={styles.masteryCount} numberOfLines={1}>{pattern.mastery}/{pattern.total}</Text>
+      <Text style={styles.masteryName} numberOfLines={2}>{pattern.name}</Text>
     </Animated.View>
   );
 };
@@ -248,7 +248,7 @@ export default function ProgressScreen() {
                     styles.patternDot,
                     { backgroundColor: pattern.isStrong ? Colors.courses.orange : Colors.backgroundSecondary }
                   ]} />
-                  <Text style={styles.patternAccuracyName}>{pattern.name}</Text>
+                  <Text style={styles.patternAccuracyName} numberOfLines={1}>{pattern.name}</Text>
                 </View>
                 <Text style={[
                   styles.patternAccuracyDiff,
@@ -267,8 +267,8 @@ export default function ProgressScreen() {
               <Star size={24} color={Colors.white} fill={Colors.white} />
             </View>
             <View style={styles.masteryInfoText}>
-              <Text style={styles.masteryInfoTitle}>Mastery shows you how confident you are with each pattern.</Text>
-              <Text style={styles.masteryInfoSubtitle}>It grows over time.</Text>
+              <Text style={styles.masteryInfoTitle} numberOfLines={2}>Mastery shows you how confident you are with each pattern.</Text>
+              <Text style={styles.masteryInfoSubtitle} numberOfLines={1}>It grows over time.</Text>
             </View>
             <View style={styles.masteryInfoBadge}>
               <Text style={styles.masteryInfoBadgeText}>10/10</Text>
@@ -458,10 +458,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   masteryInfoTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600' as const,
     color: Colors.white,
     marginBottom: 2,
+    lineHeight: 18,
   },
   masteryInfoSubtitle: {
     fontSize: 12,
@@ -543,14 +544,15 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   masteryCount: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700' as const,
     color: Colors.text,
   },
   masteryName: {
-    fontSize: 11,
+    fontSize: 10,
     color: Colors.textSecondary,
-    textAlign: 'center',
+    textAlign: 'center' as const,
+    lineHeight: 12,
   },
   lotusDecoration: {
     position: 'absolute',
@@ -865,9 +867,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   patternAccuracyName: {
-    fontSize: 15,
+    fontSize: 14,
     color: Colors.text,
     fontWeight: '500' as const,
+    flex: 1,
   },
   patternAccuracyDiff: {
     fontSize: 15,

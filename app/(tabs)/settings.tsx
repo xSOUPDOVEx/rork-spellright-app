@@ -83,7 +83,7 @@ export default function SettingsScreen() {
                         <Check size={16} color={Colors.white} strokeWidth={3} />
                       </View>
                     )}
-                    <Text style={[styles.themeLabel, { color: Colors.text }]}>{theme.name}</Text>
+                    <Text style={[styles.themeLabel, { color: Colors.text }]} numberOfLines={2}>{theme.name}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -462,9 +462,11 @@ function createStyles() {
       alignItems: 'center',
     },
     themeLabel: {
-      fontSize: 13,
+      fontSize: 11,
       fontWeight: '600' as const,
       marginTop: 8,
+      textAlign: 'center' as const,
+      lineHeight: 14,
     },
     accentGrid: {
       flexDirection: 'row',
