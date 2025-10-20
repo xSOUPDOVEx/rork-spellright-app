@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { Check, Delete, Star, X } from 'lucide-react-native';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Animated, Dimensions, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Dimensions, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ConfettiCannon from 'react-native-confetti-cannon';
 
@@ -57,7 +57,6 @@ export default function DrillScreen() {
   const xpOpacityAnim = useState(new Animated.Value(0))[0];
   const feedbackScaleAnim = useState(new Animated.Value(0))[0];
   const pulseAnim = useState(new Animated.Value(1))[0];
-  const keyAnimations = useRef<{ [key: string]: Animated.Value }>({}).current;
   const lastPressTime = useRef(0);
 
   useEffect(() => {
@@ -88,24 +87,7 @@ export default function DrillScreen() {
 
   const currentWord = words[currentWordIndex];
 
-  const animateKeyPress = useCallback((key: string) => {
-    if (!keyAnimations[key]) {
-      keyAnimations[key] = new Animated.Value(1);
-    }
-    
-    Animated.sequence([
-      Animated.timing(keyAnimations[key], {
-        toValue: 0.9,
-        duration: 30,
-        useNativeDriver: true,
-      }),
-      Animated.timing(keyAnimations[key], {
-        toValue: 1,
-        duration: 60,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [keyAnimations]);
+
 
   const handleKeyPress = useCallback((key: string) => {
     const now = Date.now();
@@ -120,11 +102,7 @@ export default function DrillScreen() {
     }
     
     setUserInput(prev => prev + key.toLowerCase());
-    
-    requestAnimationFrame(() => {
-      animateKeyPress(key);
-    });
-  }, [showFeedback, currentWord, userInput.length, animateKeyPress]);
+  }, [showFeedback, currentWord, userInput.length]);
 
   const handleBackspace = useCallback(() => {
     const now = Date.now();
@@ -139,15 +117,10 @@ export default function DrillScreen() {
     }
     
     setUserInput(prev => prev.slice(0, -1));
-    
-    requestAnimationFrame(() => {
-      animateKeyPress('backspace');
-    });
-  }, [showFeedback, userInput.length, animateKeyPress]);
+  }, [showFeedback, userInput.length]);
 
   const handleSubmit = () => {
     if (!currentWord || userInput.length === 0) return;
-    animateKeyPress('submit');
 
     const correct = userInput.toLowerCase() === currentWord.word.toLowerCase();
     setIsCorrect(correct);
@@ -481,29 +454,18 @@ export default function DrillScreen() {
                 {rowIndex === 1 && <View style={styles.spacer} />}
                 {rowIndex === 2 && <View style={styles.spacer} />}
                 {row.map((key) => {
-                  if (!keyAnimations[key]) {
-                    keyAnimations[key] = new Animated.Value(1);
-                  }
                   const isDisabled = showFeedback || (currentWord && userInput.length >= currentWord.word.length);
                   
                   return (
-                    <Pressable
+                    <TouchableOpacity
                       key={key}
                       onPress={() => handleKeyPress(key)}
                       disabled={isDisabled}
+                      activeOpacity={0.7}
+                      style={[styles.key, isDisabled && styles.keyDisabled]}
                     >
-                      <Animated.View
-                        style={[
-                          styles.key,
-                          isDisabled && styles.keyDisabled,
-                          {
-                            transform: [{ scale: keyAnimations[key] }],
-                          },
-                        ]}
-                      >
-                        <Text style={styles.keyText}>{key}</Text>
-                      </Animated.View>
-                    </Pressable>
+                      <Text style={styles.keyText}>{key}</Text>
+                    </TouchableOpacity>
                   );
                 })}
                 {rowIndex === 1 && <View style={styles.spacer} />}
@@ -511,57 +473,33 @@ export default function DrillScreen() {
               </View>
             ))}
             <View style={styles.bottomActionsRow}>
-              {(() => {
-                if (!keyAnimations['backspace']) {
-                  keyAnimations['backspace'] = new Animated.Value(1);
-                }
-                if (!keyAnimations['submit']) {
-                  keyAnimations['submit'] = new Animated.Value(1);
-                }
-                const backspaceDisabled = showFeedback || userInput.length === 0;
-                const submitDisabled = showFeedback || userInput.length === 0;
-                
-                return (
-                  <>
-                    <Pressable
-                      onPress={handleBackspace}
-                      disabled={backspaceDisabled}
-                      style={styles.actionButtonWrapper}
-                    >
-                      <Animated.View
-                        style={[
-                          styles.duolingoButton,
-                          styles.backspaceButton,
-                          backspaceDisabled && styles.buttonDisabled,
-                          {
-                            transform: [{ scale: keyAnimations['backspace'] }],
-                          },
-                        ]}
-                      >
-                        <Delete size={24} color={Colors.text} strokeWidth={2.5} />
-                      </Animated.View>
-                    </Pressable>
-                    <Pressable
-                      onPress={handleSubmit}
-                      disabled={submitDisabled}
-                      style={[styles.actionButtonWrapper, styles.checkButtonWrapper]}
-                    >
-                      <Animated.View
-                        style={[
-                          styles.duolingoButton,
-                          styles.checkButton,
-                          submitDisabled && styles.checkButtonDisabled,
-                          {
-                            transform: [{ scale: keyAnimations['submit'] }],
-                          },
-                        ]}
-                      >
-                        <Text style={styles.checkButtonText}>CHECK</Text>
-                      </Animated.View>
-                    </Pressable>
-                  </>
-                );
-              })()}
+              <TouchableOpacity
+                onPress={handleBackspace}
+                disabled={showFeedback || userInput.length === 0}
+                activeOpacity={0.7}
+                style={[
+                  styles.actionButtonWrapper,
+                  styles.duolingoButton,
+                  styles.backspaceButton,
+                  (showFeedback || userInput.length === 0) && styles.buttonDisabled,
+                ]}
+              >
+                <Delete size={24} color={Colors.text} strokeWidth={2.5} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleSubmit}
+                disabled={showFeedback || userInput.length === 0}
+                activeOpacity={0.7}
+                style={[
+                  styles.actionButtonWrapper,
+                  styles.checkButtonWrapper,
+                  styles.duolingoButton,
+                  styles.checkButton,
+                  (showFeedback || userInput.length === 0) && styles.checkButtonDisabled,
+                ]}
+              >
+                <Text style={styles.checkButtonText}>CHECK</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
