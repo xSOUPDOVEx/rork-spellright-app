@@ -19,19 +19,19 @@ const KEYBOARD_ROWS = [
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const getLetterBoxSize = (wordLength: number) => {
-  const containerPadding = 48;
+  const containerPadding = 56;
   const availableWidth = SCREEN_WIDTH - containerPadding;
   const maxBoxWidth = 48;
-  const minBoxWidth = 28;
-  const gap = 6;
+  const minBoxWidth = 22;
+  const gap = 4;
   
   const totalGapWidth = (wordLength - 1) * gap;
   let boxWidth = (availableWidth - totalGapWidth) / wordLength;
   
   boxWidth = Math.max(minBoxWidth, Math.min(maxBoxWidth, boxWidth));
   
-  const fontSize = boxWidth > 40 ? 24 : boxWidth > 32 ? 20 : 18;
-  const height = boxWidth > 40 ? 56 : boxWidth > 32 ? 48 : 42;
+  const fontSize = boxWidth > 40 ? 22 : boxWidth > 32 ? 18 : boxWidth > 26 ? 16 : 14;
+  const height = boxWidth > 40 ? 54 : boxWidth > 32 ? 46 : boxWidth > 26 ? 40 : 36;
   
   return {
     width: boxWidth,
@@ -237,7 +237,7 @@ export default function DrillScreen() {
         {showConfetti && (
           <ConfettiCannon
             count={50}
-            origin={{ x: SCREEN_WIDTH / 2, y: 0 }}
+            origin={{ x: SCREEN_WIDTH / 2, y: 150 }}
             fadeOut
           />
         )}
@@ -704,9 +704,10 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 6,
+    gap: 4,
     marginBottom: 16,
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
+    flexWrap: 'nowrap',
   },
   letterBox: {
     borderRadius: 12,
