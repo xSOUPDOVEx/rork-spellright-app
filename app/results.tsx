@@ -51,7 +51,7 @@ export default function ResultsScreen() {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
             <View style={styles.scoreCircle}>
-              <Text style={styles.scoreText}>{accuracy}%</Text>
+              <Text style={styles.scoreText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>{accuracy}%</Text>
             </View>
             <Text style={styles.title}>Practice Complete!</Text>
             <Text style={styles.subtitle}>
@@ -152,7 +152,6 @@ const styles = StyleSheet.create({
     color: Colors.white,
     textAlign: 'center' as const,
     includeFontPadding: false,
-    numberOfLines: 1,
   },
   title: {
     fontSize: 28,
