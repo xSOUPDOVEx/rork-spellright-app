@@ -40,6 +40,24 @@ const getLetterBoxSize = (wordLength: number) => {
   };
 };
 
+const triggerHaptic = (type: 'light' | 'success' | 'error', hapticEnabled: boolean) => {
+  if (Platform.OS === 'web' || !Haptics || !hapticEnabled) return;
+  
+  setTimeout(() => {
+    try {
+      if (type === 'light') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } else if (type === 'success') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } else if (type === 'error') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+    } catch (error) {
+      console.error('Haptic feedback error:', error);
+    }
+  }, 0);
+};
+
 export default function DrillScreen() {
   const { settings, addXP, updateStreak, incrementWordsLearned } = useApp();
   const router = useRouter();
@@ -97,13 +115,10 @@ export default function DrillScreen() {
     if (showFeedback) return;
     if (!currentWord || userInput.length >= currentWord.word.length) return;
     
-    // TEMPORARILY DISABLED FOR TESTING
-    // if (Platform.OS !== 'web' && Haptics?.impactAsync) {
-    //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    // }
-    
     setUserInput(prev => prev + key.toLowerCase());
-  }, [showFeedback, currentWord, userInput.length]);
+    
+    triggerHaptic('light', settings.hapticEnabled);
+  }, [showFeedback, currentWord, userInput.length, settings.hapticEnabled]);
 
   const handleBackspace = useCallback(() => {
     const now = Date.now();
@@ -113,13 +128,10 @@ export default function DrillScreen() {
     if (showFeedback) return;
     if (userInput.length === 0) return;
     
-    // TEMPORARILY DISABLED FOR TESTING
-    // if (Platform.OS !== 'web' && Haptics?.impactAsync) {
-    //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    // }
-    
     setUserInput(prev => prev.slice(0, -1));
-  }, [showFeedback, userInput.length]);
+    
+    triggerHaptic('light', settings.hapticEnabled);
+  }, [showFeedback, userInput.length, settings.hapticEnabled]);
 
   const handleSubmit = () => {
     if (!currentWord || userInput.length === 0) return;
@@ -129,14 +141,7 @@ export default function DrillScreen() {
     setShowFeedback(true);
     setResults([...results, { word: currentWord, correct }]);
 
-    // TEMPORARILY DISABLED FOR TESTING
-    // if (Platform.OS !== 'web') {
-    //   if (correct) {
-    //     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    //   } else {
-    //     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    //   }
-    // }
+    triggerHaptic(correct ? 'success' : 'error', settings.hapticEnabled);
 
     if (settings.voiceEnabled && correct) {
       console.log('Voice feedback enabled - will play:', currentWord.word);

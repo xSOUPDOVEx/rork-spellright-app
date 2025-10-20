@@ -13,6 +13,7 @@ export type UserSettings = {
   initialLevel: SkillLevel;
   theme: ThemeType;
   accentColor: AccentColor | null;
+  hapticEnabled: boolean;
 };
 
 export type UserStats = {
@@ -56,6 +57,7 @@ const defaultSettings: UserSettings = {
   initialLevel: 'beginner',
   theme: 'warmParchment',
   accentColor: null,
+  hapticEnabled: true,
 };
 
 const defaultStats: UserStats = {
