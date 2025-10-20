@@ -3,7 +3,7 @@ import Card from '@/components/Card';
 import Colors, { THEMES, ACCENT_COLORS, type ThemeType, type AccentColor } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 import { useRouter } from 'expo-router';
-import { ChevronRight, Crown, Volume2, VolumeX, Check, Smartphone } from 'lucide-react-native';
+import { ChevronRight, Crown, Volume2, VolumeX, Check, Smartphone, Music } from 'lucide-react-native';
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -161,6 +161,22 @@ export default function SettingsScreen() {
                 trackColor={{ false: Colors.border, true: Colors.primary }}
                 thumbColor={Colors.white}
                 testID="haptic-toggle"
+              />
+            </View>
+          </Card>
+
+          <Card style={styles.cardMargin}>
+            <View style={styles.settingItem}>
+              <View style={styles.settingHeader}>
+                <Music size={20} color={Colors.primary} />
+                <Text style={styles.settingLabel}>Sound Effects</Text>
+              </View>
+              <Switch
+                value={settings.soundEnabled}
+                onValueChange={(value) => updateSettings({ soundEnabled: value })}
+                trackColor={{ false: Colors.border, true: Colors.primary }}
+                thumbColor={Colors.white}
+                testID="sound-toggle"
               />
             </View>
           </Card>

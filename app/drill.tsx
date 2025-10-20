@@ -9,6 +9,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Animated, Dimensions, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ConfettiCannon from 'react-native-confetti-cannon';
+import { playSound } from '@/lib/sounds';
 
 const KEYBOARD_ROWS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -118,7 +119,8 @@ export default function DrillScreen() {
     setUserInput(prev => prev + key.toLowerCase());
     
     triggerHaptic('light', settings.hapticEnabled);
-  }, [showFeedback, currentWord, userInput.length, settings.hapticEnabled]);
+    playSound('tap', settings.soundEnabled);
+  }, [showFeedback, currentWord, userInput.length, settings.hapticEnabled, settings.soundEnabled]);
 
   const handleBackspace = useCallback(() => {
     const now = Date.now();
@@ -131,7 +133,8 @@ export default function DrillScreen() {
     setUserInput(prev => prev.slice(0, -1));
     
     triggerHaptic('light', settings.hapticEnabled);
-  }, [showFeedback, userInput.length, settings.hapticEnabled]);
+    playSound('tap', settings.soundEnabled);
+  }, [showFeedback, userInput.length, settings.hapticEnabled, settings.soundEnabled]);
 
   const handleSubmit = () => {
     if (!currentWord || userInput.length === 0) return;
@@ -142,6 +145,7 @@ export default function DrillScreen() {
     setResults([...results, { word: currentWord, correct }]);
 
     triggerHaptic(correct ? 'success' : 'error', settings.hapticEnabled);
+    playSound(correct ? 'success' : 'error', settings.soundEnabled);
 
     if (settings.voiceEnabled && correct) {
       console.log('Voice feedback enabled - will play:', currentWord.word);

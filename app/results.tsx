@@ -8,6 +8,7 @@ import { Check, TrendingUp, X } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { playSound } from '@/lib/sounds';
 
 type ResultItem = {
   word: Word;
@@ -16,7 +17,7 @@ type ResultItem = {
 
 export default function ResultsScreen() {
   const { resultsData } = useLocalSearchParams<{ resultsData: string }>();
-  const { updateAccuracy, stats } = useApp();
+  const { updateAccuracy, stats, settings } = useApp();
   const router = useRouter();
 
   const results: ResultItem[] = resultsData ? JSON.parse(resultsData) : [];
@@ -30,8 +31,14 @@ export default function ResultsScreen() {
         (stats.wordsLearned + results.length)
       );
       updateAccuracy(newAccuracy);
+      
+      const oldLevel = Math.floor((stats.totalXP - correctCount * 10) / 100) + 1;
+      const newLevel = Math.floor(stats.totalXP / 100) + 1;
+      if (newLevel > oldLevel) {
+        playSound('levelup', settings.soundEnabled);
+      }
     }
-  }, [results.length, stats.accuracy, stats.wordsLearned, accuracy, updateAccuracy]);
+  }, [results.length, stats.accuracy, stats.wordsLearned, stats.totalXP, accuracy, updateAccuracy, correctCount, settings.soundEnabled]);
 
   const getTip = () => {
     if (accuracy === 100) {

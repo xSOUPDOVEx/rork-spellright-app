@@ -14,6 +14,7 @@ export type UserSettings = {
   theme: ThemeType;
   accentColor: AccentColor | null;
   hapticEnabled: boolean;
+  soundEnabled: boolean;
 };
 
 export type UserStats = {
@@ -58,6 +59,7 @@ const defaultSettings: UserSettings = {
   theme: 'warmParchment',
   accentColor: null,
   hapticEnabled: true,
+  soundEnabled: true,
 };
 
 const defaultStats: UserStats = {
