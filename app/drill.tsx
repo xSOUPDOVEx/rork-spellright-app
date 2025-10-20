@@ -834,7 +834,7 @@ const styles = StyleSheet.create({
   },
   xpBadge: {
     position: 'absolute' as const,
-    top: -30,
+    top: 140,
     backgroundColor: Colors.success,
     paddingHorizontal: 24,
     paddingVertical: 12,
