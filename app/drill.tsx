@@ -95,7 +95,7 @@ export default function DrillScreen() {
     keyAnimations[key].setValue(0.94);
     Animated.timing(keyAnimations[key], {
       toValue: 1,
-      duration: 50,
+      duration: 30,
       useNativeDriver: true,
     }).start();
   };
@@ -104,18 +104,12 @@ export default function DrillScreen() {
     if (showFeedback) return;
     animateKeyPress(key);
     setUserInput(prev => prev + key.toLowerCase());
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    }
   };
 
   const handleBackspace = () => {
     if (showFeedback) return;
     animateKeyPress('backspace');
     setUserInput(prev => prev.slice(0, -1));
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    }
   };
 
   const handleSubmit = () => {
