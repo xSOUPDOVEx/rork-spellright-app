@@ -10,6 +10,12 @@ import { Animated, Dimensions, KeyboardAvoidingView, Platform, Pressable, Scroll
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { playSound } from '@/lib/sounds';
+import Phase1Teaching from '@/components/phases/Phase1Teaching';
+import Phase2Testing from '@/components/phases/Phase2Testing';
+import Phase2_1Correction from '@/components/phases/Phase2_1Correction';
+import Phase2_12Recall from '@/components/phases/Phase2_12Recall';
+import Phase3Flashcard from '@/components/phases/Phase3Flashcard';
+import PhaseTransition from '@/components/PhaseTransition';
 
 const KEYBOARD_ROWS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -59,6 +65,8 @@ const triggerHaptic = (type: 'light' | 'success' | 'error', hapticEnabled: boole
   }, 0);
 };
 
+type Phase = 'phase1' | 'phase2' | 'phase2.1' | 'phase2.12' | 'phase3' | 'transition';
+
 export default function DrillScreen() {
   const { settings, addXP, updateStreak, incrementWordsLearned } = useApp();
   const router = useRouter();
@@ -77,6 +85,19 @@ export default function DrillScreen() {
   const feedbackScaleAnim = useState(new Animated.Value(0))[0];
   const pulseAnim = useState(new Animated.Value(1))[0];
   const lastPressTime = useRef(0);
+
+  const [currentPhase, setCurrentPhase] = useState<Phase>('phase1');
+  const [phase1LetterIndex, setPhase1LetterIndex] = useState<number>(0);
+  const [mistakePositions, setMistakePositions] = useState<number[]>([]);
+  const [phase2_1CurrentPosition, setPhase2_1CurrentPosition] = useState<number>(0);
+  const [phase2_1FilledLetters, setPhase2_1FilledLetters] = useState<string>('');
+  const [showPhase2_1Hover, setShowPhase2_1Hover] = useState<boolean>(false);
+  const [phase3TestPosition, setPhase3TestPosition] = useState<number>(0);
+  const [phase3PileStats, setPhase3PileStats] = useState({ toDo: 5, unsure: 0, correct: 0 });
+  const [showPhase2Correction, setShowPhase2Correction] = useState<boolean>(false);
+  const [correctionLetter, setCorrectionLetter] = useState<string>('');
+  const [transitionMessage, setTransitionMessage] = useState<string>('');
+  const [transitionIcon, setTransitionIcon] = useState<string>('');
 
   useEffect(() => {
     const filteredWords = settings.difficulty === 'mixed'
@@ -318,6 +339,81 @@ export default function DrillScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          {currentPhase === 'transition' && (
+            <PhaseTransition
+              message={transitionMessage}
+              icon={transitionIcon}
+              onComplete={() => {
+                console.log('Transition complete');
+              }}
+            />
+          )}
+
+          {currentPhase === 'phase1' && (
+            <Phase1Teaching
+              word={currentWord.word}
+              currentLetterIndex={phase1LetterIndex}
+              onLetterComplete={() => {
+                console.log('Letter complete - Phase 1');
+              }}
+            />
+          )}
+
+          {currentPhase === 'phase2' && (
+            <Phase2Testing
+              word={currentWord.word}
+              userInput={userInput}
+              showCorrection={showPhase2Correction}
+              correctionLetter={correctionLetter}
+              onLetterInput={() => {
+                console.log('Letter input - Phase 2');
+              }}
+              hint={currentWord.hint || 'No hint available'}
+            />
+          )}
+
+          {currentPhase === 'phase2.1' && (
+            <Phase2_1Correction
+              word={currentWord.word}
+              mistakePositions={mistakePositions}
+              currentPosition={phase2_1CurrentPosition}
+              filledLetters={phase2_1FilledLetters}
+              showHover={showPhase2_1Hover}
+              hoverLetter={correctionLetter}
+              onLetterInput={() => {
+                console.log('Letter input - Phase 2.1');
+              }}
+              hint={currentWord.hint || 'No hint available'}
+            />
+          )}
+
+          {currentPhase === 'phase2.12' && (
+            <Phase2_12Recall
+              word={currentWord.word}
+              userInput={userInput}
+              onLetterInput={() => {
+                console.log('Letter input - Phase 2.12');
+              }}
+              hint={currentWord.hint || 'No hint available'}
+            />
+          )}
+
+          {currentPhase === 'phase3' && (
+            <Phase3Flashcard
+              word={currentWord.word}
+              testPosition={phase3TestPosition}
+              userInput={userInput}
+              onLetterInput={() => {
+                console.log('Letter input - Phase 3');
+              }}
+              hint={currentWord.hint || 'No hint available'}
+              pileStats={phase3PileStats}
+              showCorrection={showPhase2Correction}
+              correctionLetter={correctionLetter}
+              isCorrect={isCorrect}
+            />
+          )}
+
           <Animated.View style={[styles.wordContainer, { opacity: fadeAnim }]}>
             {!showFeedback && (
               <>
