@@ -5,7 +5,7 @@ import { mockWords, Word } from '@/mocks/words';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { Check, Delete, Star, X } from 'lucide-react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Animated, Dimensions, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ConfettiCannon from 'react-native-confetti-cannon';
@@ -58,8 +58,7 @@ export default function DrillScreen() {
   const feedbackScaleAnim = useState(new Animated.Value(0))[0];
   const pulseAnim = useState(new Animated.Value(1))[0];
   const keyAnimations = useRef<{ [key: string]: Animated.Value }>({}).current;
-  const inputQueueRef = useRef<string[]>([]);
-  const isProcessingRef = useRef(false);
+  const lastPressTime = useRef(0);
 
   useEffect(() => {
     const filteredWords = settings.difficulty === 'mixed'
@@ -89,60 +88,62 @@ export default function DrillScreen() {
 
   const currentWord = words[currentWordIndex];
 
-  const animateKeyPress = (key: string) => {
+  const animateKeyPress = useCallback((key: string) => {
     if (!keyAnimations[key]) {
       keyAnimations[key] = new Animated.Value(1);
     }
     
-    keyAnimations[key].setValue(0.94);
-    Animated.timing(keyAnimations[key], {
-      toValue: 1,
-      duration: 30,
-      useNativeDriver: true,
-    }).start();
-  };
+    Animated.sequence([
+      Animated.timing(keyAnimations[key], {
+        toValue: 0.9,
+        duration: 30,
+        useNativeDriver: true,
+      }),
+      Animated.timing(keyAnimations[key], {
+        toValue: 1,
+        duration: 60,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [keyAnimations]);
 
-  const processInputQueue = () => {
-    if (isProcessingRef.current || inputQueueRef.current.length === 0) return;
+  const handleKeyPress = useCallback((key: string) => {
+    const now = Date.now();
+    if (now - lastPressTime.current < 30) return;
+    lastPressTime.current = now;
     
-    isProcessingRef.current = true;
-    const action = inputQueueRef.current.shift();
-    
-    if (action === 'BACKSPACE') {
-      setUserInput(prev => prev.slice(0, -1));
-      animateKeyPress('backspace');
-    } else if (action) {
-      setUserInput(prev => {
-        if (currentWord && prev.length < currentWord.word.length) {
-          return prev + action.toLowerCase();
-        }
-        return prev;
-      });
-      animateKeyPress(action);
-    }
-    
-    isProcessingRef.current = false;
-    
-    if (inputQueueRef.current.length > 0) {
-      setTimeout(processInputQueue, 0);
-    }
-  };
-
-  const handleKeyPress = (key: string) => {
     if (showFeedback) return;
     if (!currentWord || userInput.length >= currentWord.word.length) return;
     
-    inputQueueRef.current.push(key);
-    processInputQueue();
-  };
+    if (Platform.OS !== 'web' && Haptics?.impactAsync) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    }
+    
+    setUserInput(prev => prev + key.toLowerCase());
+    
+    requestAnimationFrame(() => {
+      animateKeyPress(key);
+    });
+  }, [showFeedback, currentWord, userInput.length, animateKeyPress]);
 
-  const handleBackspace = () => {
+  const handleBackspace = useCallback(() => {
+    const now = Date.now();
+    if (now - lastPressTime.current < 30) return;
+    lastPressTime.current = now;
+    
     if (showFeedback) return;
     if (userInput.length === 0) return;
     
-    inputQueueRef.current.push('BACKSPACE');
-    processInputQueue();
-  };
+    if (Platform.OS !== 'web' && Haptics?.impactAsync) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    }
+    
+    setUserInput(prev => prev.slice(0, -1));
+    
+    requestAnimationFrame(() => {
+      animateKeyPress('backspace');
+    });
+  }, [showFeedback, userInput.length, animateKeyPress]);
 
   const handleSubmit = () => {
     if (!currentWord || userInput.length === 0) return;
@@ -226,8 +227,6 @@ export default function DrillScreen() {
 
   const handleContinue = () => {
     if (currentWordIndex < words.length - 1) {
-      inputQueueRef.current = [];
-      isProcessingRef.current = false;
       setCurrentWordIndex(currentWordIndex + 1);
       setUserInput('');
       setShowFeedback(false);
@@ -485,7 +484,7 @@ export default function DrillScreen() {
                   if (!keyAnimations[key]) {
                     keyAnimations[key] = new Animated.Value(1);
                   }
-                  const isDisabled = showFeedback || userInput.length === currentWord.word.length;
+                  const isDisabled = showFeedback || (currentWord && userInput.length >= currentWord.word.length);
                   
                   return (
                     <Pressable
