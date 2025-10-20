@@ -97,9 +97,10 @@ export default function DrillScreen() {
     if (showFeedback) return;
     if (!currentWord || userInput.length >= currentWord.word.length) return;
     
-    if (Platform.OS !== 'web' && Haptics?.impactAsync) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    }
+    // TEMPORARILY DISABLED FOR TESTING
+    // if (Platform.OS !== 'web' && Haptics?.impactAsync) {
+    //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    // }
     
     setUserInput(prev => prev + key.toLowerCase());
   }, [showFeedback, currentWord, userInput.length]);
@@ -112,9 +113,10 @@ export default function DrillScreen() {
     if (showFeedback) return;
     if (userInput.length === 0) return;
     
-    if (Platform.OS !== 'web' && Haptics?.impactAsync) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    }
+    // TEMPORARILY DISABLED FOR TESTING
+    // if (Platform.OS !== 'web' && Haptics?.impactAsync) {
+    //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    // }
     
     setUserInput(prev => prev.slice(0, -1));
   }, [showFeedback, userInput.length]);
@@ -127,13 +129,14 @@ export default function DrillScreen() {
     setShowFeedback(true);
     setResults([...results, { word: currentWord, correct }]);
 
-    if (Platform.OS !== 'web') {
-      if (correct) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      } else {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
-    }
+    // TEMPORARILY DISABLED FOR TESTING
+    // if (Platform.OS !== 'web') {
+    //   if (correct) {
+    //     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    //   } else {
+    //     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    //   }
+    // }
 
     if (settings.voiceEnabled && correct) {
       console.log('Voice feedback enabled - will play:', currentWord.word);
