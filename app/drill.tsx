@@ -58,6 +58,8 @@ export default function DrillScreen() {
   const feedbackScaleAnim = useState(new Animated.Value(0))[0];
   const pulseAnim = useState(new Animated.Value(1))[0];
   const keyAnimations = useRef<{ [key: string]: Animated.Value }>({}).current;
+  const inputQueueRef = useRef<string[]>([]);
+  const isProcessingRef = useRef(false);
 
   useEffect(() => {
     const filteredWords = settings.difficulty === 'mixed'
@@ -100,16 +102,46 @@ export default function DrillScreen() {
     }).start();
   };
 
+  const processInputQueue = () => {
+    if (isProcessingRef.current || inputQueueRef.current.length === 0) return;
+    
+    isProcessingRef.current = true;
+    const action = inputQueueRef.current.shift();
+    
+    if (action === 'BACKSPACE') {
+      setUserInput(prev => prev.slice(0, -1));
+      animateKeyPress('backspace');
+    } else if (action) {
+      setUserInput(prev => {
+        if (currentWord && prev.length < currentWord.word.length) {
+          return prev + action.toLowerCase();
+        }
+        return prev;
+      });
+      animateKeyPress(action);
+    }
+    
+    isProcessingRef.current = false;
+    
+    if (inputQueueRef.current.length > 0) {
+      setTimeout(processInputQueue, 0);
+    }
+  };
+
   const handleKeyPress = (key: string) => {
     if (showFeedback) return;
-    animateKeyPress(key);
-    setUserInput(prev => prev + key.toLowerCase());
+    if (!currentWord || userInput.length >= currentWord.word.length) return;
+    
+    inputQueueRef.current.push(key);
+    processInputQueue();
   };
 
   const handleBackspace = () => {
     if (showFeedback) return;
-    animateKeyPress('backspace');
-    setUserInput(prev => prev.slice(0, -1));
+    if (userInput.length === 0) return;
+    
+    inputQueueRef.current.push('BACKSPACE');
+    processInputQueue();
   };
 
   const handleSubmit = () => {
@@ -194,6 +226,8 @@ export default function DrillScreen() {
 
   const handleContinue = () => {
     if (currentWordIndex < words.length - 1) {
+      inputQueueRef.current = [];
+      isProcessingRef.current = false;
       setCurrentWordIndex(currentWordIndex + 1);
       setUserInput('');
       setShowFeedback(false);
